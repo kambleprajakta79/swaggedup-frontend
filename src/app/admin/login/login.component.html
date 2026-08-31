@@ -1,0 +1,60 @@
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md glass-panel p-8 md:p-10 animate-fade-in">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <span class="text-gold-500 uppercase tracking-[0.4em] text-xs font-semibold block mb-2">CONTROL PORTAL</span>
+      <h2 class="text-2xl font-bold text-ivory tracking-wider uppercase font-display">ADMIN LOGIN</h2>
+      <div class="w-12 h-[1px] bg-gold-500 mx-auto mt-3"></div>
+    </div>
+
+    <!-- Form -->
+    <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-6">
+      <!-- Email -->
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">ADMIN EMAIL *</label>
+        <input 
+          type="email" 
+          formControlName="email"
+          placeholder="admin@swaggedup.com" 
+          value="admin@swaggedup.com"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+        <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-xs text-red-500 mt-1">
+          A valid email address is required.
+        </div>
+      </div>
+
+      <!-- Password -->
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PASSWORD *</label>
+        <input 
+          type="password" 
+          formControlName="password"
+          placeholder="••••••••" 
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+        <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="text-xs text-red-500 mt-1">
+          Password is required (minimum 6 characters).
+        </div>
+      </div>
+
+      <!-- Submit -->
+      <button 
+        type="submit" 
+        [disabled]="submitting"
+        class="w-full bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 disabled:cursor-not-allowed font-display text-xs font-bold tracking-widest py-4 uppercase transition-all hover-gold-glow mt-2 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span *ngIf="submitting" class="w-3.5 h-3.5 border-2 border-charcoal-900 border-t-transparent rounded-full animate-spin"></span>
+        {{ submitting ? 'AUTHENTICATING...' : 'ACCESS PORTAL' }}
+      </button>
+
+      <!-- Back to shop -->
+      <a 
+        routerLink="/" 
+        class="text-center text-[10px] text-charcoal-450 hover:text-gold-500 tracking-widest uppercase transition-colors"
+      >
+        &larr; Return to Storefront
+      </a>
+    </form>
+  </div>
+</div>

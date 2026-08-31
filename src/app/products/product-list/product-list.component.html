@@ -1,0 +1,330 @@
+<div class="min-h-screen pt-12 pb-24 px-4 max-w-7xl mx-auto">
+  <!-- Page Header -->
+  <div class="mb-12">
+    <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">Explore Collections</span>
+    <h1 class="text-3xl md:text-5xl font-bold text-ivory tracking-wide uppercase">THE ATELIER</h1>
+    <p class="text-charcoal-400 font-light text-sm mt-2">Browse our high-end menswear catalog with bespoke filters.</p>
+  </div>
+
+  <div class="flex flex-col lg:flex-row gap-8">
+    <!-- Sidebar Filters (Desktop Only) -->
+    <aside class="hidden lg:flex w-64 flex-shrink-0 flex-col gap-6">
+      <!-- Search -->
+      <div class="glass-panel p-6">
+        <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-4">SEARCH</h3>
+        <div class="relative">
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            (ngModelChange)="applyFilters()"
+            placeholder="Search products..." 
+            class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+          />
+        </div>
+      </div>
+
+      <!-- Categories -->
+      <div class="glass-panel p-6">
+        <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-4">CATEGORIES</h3>
+        <div class="flex flex-col gap-2">
+          <label class="flex items-center text-sm font-light cursor-pointer text-charcoal-300 hover:text-gold-500 transition-colors">
+            <input 
+              type="radio" 
+              name="category" 
+              value="" 
+              [(ngModel)]="selectedCategory" 
+              (change)="applyFilters()" 
+              class="mr-3 accent-gold-500"
+            />
+            All Categories
+          </label>
+          <label 
+            *ngFor="let cat of categories" 
+            class="flex items-center text-sm font-light cursor-pointer text-charcoal-300 hover:text-gold-500 transition-colors"
+          >
+            <input 
+              type="radio" 
+              name="category" 
+              [value]="cat.slug" 
+              [(ngModel)]="selectedCategory" 
+              (change)="applyFilters()" 
+              class="mr-3 accent-gold-500"
+            />
+            {{ cat.name }}
+          </label>
+        </div>
+      </div>
+
+      <!-- Price Range -->
+      <div class="glass-panel p-6">
+        <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-4">PRICE RANGE</h3>
+        <div class="flex items-center gap-2 mb-4">
+          <input 
+            type="number" 
+            placeholder="Min" 
+            [(ngModel)]="minPrice" 
+            class="w-1/2 bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2 focus:outline-none focus:border-gold-500 transition-all"
+          />
+          <span class="text-charcoal-400 text-xs">-</span>
+          <input 
+            type="number" 
+            placeholder="Max" 
+            [(ngModel)]="maxPrice" 
+            class="w-1/2 bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2 focus:outline-none focus:border-gold-500 transition-all"
+          />
+        </div>
+        <button 
+          (click)="applyFilters()"
+          class="w-full bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest py-2.5 uppercase hover:bg-gold-600 transition-colors cursor-pointer"
+        >
+          APPLY PRICE
+        </button>
+      </div>
+
+      <!-- Sizes -->
+      <div class="glass-panel p-6">
+        <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-4">SIZES</h3>
+        <div class="flex flex-wrap gap-2">
+          <button 
+            *ngFor="let size of sizeOptions" 
+            (click)="toggleSize(size)"
+            [ngClass]="{
+              'border-gold-500 text-gold-500 bg-gold-500/10 font-bold': selectedSizes.includes(size),
+              'border-charcoal-800 text-charcoal-350 hover:border-charcoal-600': !selectedSizes.includes(size)
+            }"
+            class="border px-3 py-2 text-xs transition-all duration-200 cursor-pointer"
+          >
+            {{ size }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Reset -->
+      <button 
+        (click)="resetFilters()"
+        class="w-full border border-charcoal-850 hover:bg-charcoal-900 text-charcoal-300 text-xs font-bold tracking-widest py-3 uppercase transition-all cursor-pointer"
+      >
+        RESET ALL FILTERS
+      </button>
+    </aside>
+
+    <!-- Products Column -->
+    <main class="flex-grow">
+      <!-- Sorting & Info Bar -->
+      <div class="flex flex-col sm:flex-row items-center justify-between border border-charcoal-800 bg-charcoal-900/20 p-4 mb-8 gap-4">
+        <div class="text-xs text-charcoal-350 font-light">
+          Showing <span class="text-ivory font-bold">{{ products.length }}</span> of <span class="text-ivory font-bold">{{ totalProducts }}</span> products
+        </div>
+
+        <div class="flex items-center gap-2">
+          <span class="text-xs text-charcoal-350 uppercase tracking-wider font-medium">Sort By:</span>
+          <select 
+            [(ngModel)]="sortBy" 
+            (change)="applyFilters()"
+            class="bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2 focus:outline-none focus:border-gold-500 cursor-pointer transition-all"
+          >
+            <option value="newest">Newest Arrivals</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="name_asc">Alphabetical: A to Z</option>
+            <option value="name_desc">Alphabetical: Z to A</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Loader state -->
+      <app-skeleton-loader *ngIf="loading" type="grid" [count]="6"></app-skeleton-loader>
+
+      <!-- Empty state -->
+      <div *ngIf="!loading && products.length === 0" class="text-center py-20 border border-charcoal-850 glass-panel">
+        <span class="text-gold-500 text-4xl block mb-4">&otimes;</span>
+        <h3 class="text-lg font-bold text-ivory tracking-widest uppercase mb-2">NO PRODUCTS FOUND</h3>
+        <p class="text-charcoal-400 font-light text-sm max-w-sm mx-auto mb-6">
+          We couldn't find any products matching your specific selection. Try clearing some filters.
+        </p>
+        <button 
+          (click)="resetFilters()"
+          class="bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest px-6 py-3 uppercase hover:bg-gold-600 transition-colors cursor-pointer"
+        >
+          CLEAR FILTERS
+        </button>
+      </div>
+
+      <!-- Products Grid -->
+      <div *ngIf="!loading && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8">
+        <app-product-card 
+          *ngFor="let product of products" 
+          [product]="product"
+          (quickAdd)="quickAdd($event)"
+        ></app-product-card>
+      </div>
+
+      <!-- Pagination controls -->
+      <div *ngIf="!loading && totalPages > 1" class="flex items-center justify-center gap-4 mt-12 py-4 border-t border-charcoal-900">
+        <button 
+          (click)="changePage(page - 1)" 
+          [disabled]="page === 1"
+          class="border border-charcoal-800 text-ivory hover:border-gold-500 disabled:opacity-30 disabled:hover:border-charcoal-800 disabled:cursor-not-allowed px-4 py-2.5 text-xs font-bold tracking-widest uppercase transition-all duration-200 cursor-pointer"
+        >
+          &larr; PREVIOUS
+        </button>
+        <span class="text-xs text-charcoal-350 font-light">
+          Page <span class="text-ivory font-bold">{{ page }}</span> of <span class="text-ivory font-bold">{{ totalPages }}</span>
+        </span>
+        <button 
+          (click)="changePage(page + 1)" 
+          [disabled]="page === totalPages"
+          class="border border-charcoal-800 text-ivory hover:border-gold-500 disabled:opacity-30 disabled:hover:border-charcoal-800 disabled:cursor-not-allowed px-4 py-2.5 text-xs font-bold tracking-widest uppercase transition-all duration-200 cursor-pointer"
+        >
+          NEXT &rarr;
+        </button>
+      </div>
+    </main>
+  </div>
+
+  <!-- Fixed Bottom Mobile Filter Bar -->
+  <div class="fixed bottom-0 inset-x-0 z-[900] bg-white border-t border-charcoal-700/80 p-3 lg:hidden flex gap-4 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
+    <button 
+      (click)="openMobileFilters()"
+      class="flex-grow bg-charcoal-300 text-white text-xs font-bold tracking-widest py-3.5 uppercase flex items-center justify-center gap-2 hover:bg-gold-500 hover:text-charcoal-900 transition-colors cursor-pointer"
+    >
+      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4">
+        <path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-9.75 0h9.75" />
+      </svg>
+      FILTERS & SORT
+    </button>
+  </div>
+
+  <!-- Mobile Filter Overlay (Drawer) -->
+  <div 
+    *ngIf="mobileFiltersOpen" 
+    class="fixed inset-0 z-[1000] bg-charcoal-950/40 backdrop-blur-sm lg:hidden flex justify-end animate-fade-in"
+    (click)="closeMobileFilters()"
+  >
+    <div 
+      class="w-full max-w-[85vw] h-full bg-white flex flex-col shadow-2xl"
+      (click)="$event.stopPropagation()"
+    >
+      <!-- Header -->
+      <div class="p-6 border-b border-charcoal-700/50 flex items-center justify-between bg-charcoal-900/10">
+        <h2 class="text-sm font-bold text-charcoal-300 tracking-widest uppercase font-display">FILTER & SORT</h2>
+        <button (click)="closeMobileFilters()" class="text-charcoal-400 hover:text-gold-500 font-bold text-xl p-1 cursor-pointer">&times;</button>
+      </div>
+
+      <!-- Filters Content (Scrollable) -->
+      <div class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
+        
+        <!-- Search -->
+        <div>
+          <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-3">SEARCH</h4>
+          <input 
+            type="text" 
+            [(ngModel)]="searchQuery" 
+            placeholder="Search products..." 
+            class="w-full bg-white border border-charcoal-700 text-xs text-charcoal-300 px-3 py-2.5 focus:outline-none focus:border-gold-500 transition-all font-light"
+          />
+        </div>
+
+        <!-- Categories -->
+        <div>
+          <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-3">CATEGORIES</h4>
+          <div class="flex flex-col gap-2 max-h-40 overflow-y-auto pr-1">
+            <label class="flex items-center text-xs font-light cursor-pointer text-charcoal-400 hover:text-gold-500 transition-colors">
+              <input 
+                type="radio" 
+                name="mobileCategory" 
+                value="" 
+                [(ngModel)]="selectedCategory" 
+                class="mr-3 accent-gold-500"
+              />
+              All Categories
+            </label>
+            <label 
+              *ngFor="let cat of categories" 
+              class="flex items-center text-xs font-light cursor-pointer text-charcoal-400 hover:text-gold-500 transition-colors"
+            >
+              <input 
+                type="radio" 
+                name="mobileCategory" 
+                [value]="cat.slug" 
+                [(ngModel)]="selectedCategory" 
+                class="mr-3 accent-gold-500"
+              />
+              {{ cat.name }}
+            </label>
+          </div>
+        </div>
+
+        <!-- Price Range -->
+        <div>
+          <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-3">PRICE RANGE</h4>
+          <div class="flex items-center gap-2">
+            <input 
+              type="number" 
+              placeholder="Min" 
+              [(ngModel)]="minPrice" 
+              class="w-1/2 bg-white border border-charcoal-700 text-xs text-charcoal-300 px-3 py-2 focus:outline-none focus:border-gold-500 transition-all"
+            />
+            <span class="text-charcoal-400 text-xs">-</span>
+            <input 
+              type="number" 
+              placeholder="Max" 
+              [(ngModel)]="maxPrice" 
+              class="w-1/2 bg-white border border-charcoal-700 text-xs text-charcoal-300 px-3 py-2 focus:outline-none focus:border-gold-500 transition-all"
+            />
+          </div>
+        </div>
+
+        <!-- Sizes -->
+        <div>
+          <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-3">SIZES</h4>
+          <div class="flex flex-wrap gap-2">
+            <button 
+              *ngFor="let size of sizeOptions" 
+              (click)="toggleSize(size)"
+              [ngClass]="{
+                'border-gold-500 text-gold-500 bg-gold-500/10 font-bold': selectedSizes.includes(size),
+                'border-charcoal-700 text-charcoal-400 hover:border-charcoal-500': !selectedSizes.includes(size)
+              }"
+              class="border px-2.5 py-1.5 text-xs transition-all duration-200 cursor-pointer"
+            >
+              {{ size }}
+            </button>
+          </div>
+        </div>
+
+        <!-- Sort By -->
+        <div>
+          <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-3">SORT BY</h4>
+          <select 
+            [(ngModel)]="sortBy" 
+            class="w-full bg-white border border-charcoal-700 text-xs text-charcoal-300 px-3 py-2.5 focus:outline-none focus:border-gold-500 cursor-pointer transition-all"
+          >
+            <option value="newest">Newest Arrivals</option>
+            <option value="price_asc">Price: Low to High</option>
+            <option value="price_desc">Price: High to Low</option>
+            <option value="name_asc">Alphabetical: A to Z</option>
+            <option value="name_desc">Alphabetical: Z to A</option>
+          </select>
+        </div>
+
+      </div>
+
+      <!-- Drawer Footer Actions -->
+      <div class="p-6 border-t border-charcoal-700/50 flex flex-col gap-3 bg-charcoal-900/10">
+        <button 
+          (click)="applyMobileFilters()"
+          class="w-full bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest py-3.5 uppercase hover:bg-gold-600 transition-colors cursor-pointer text-center"
+        >
+          APPLY FILTERS
+        </button>
+        <button 
+          (click)="resetMobileFilters()"
+          class="w-full border border-charcoal-700 hover:bg-charcoal-900 text-charcoal-300 text-xs font-bold tracking-widest py-3 uppercase transition-all cursor-pointer text-center"
+        >
+          RESET ALL
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

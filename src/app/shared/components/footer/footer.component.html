@@ -1,0 +1,53 @@
+<footer class="bg-charcoal-950 border-t border-charcoal-850/50 py-16 px-6">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-10">
+    <!-- Info Column -->
+    <div class="flex flex-col gap-4">
+      <h3 class="font-display font-black tracking-widest text-lg text-ivory uppercase">SWAGGEDUP</h3>
+      <p class="text-xs text-charcoal-400 font-light leading-relaxed">
+        Uncompromising modern menswear. Reconstructing classic tailoring with urban streetwear sensibilities.
+      </p>
+    </div>
+
+    <!-- Shop Column -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase font-display">SHOP</h4>
+      <ul class="flex flex-col gap-2 text-xs font-light text-charcoal-350 list-none p-0 m-0">
+        <li><a routerLink="/shop" class="hover:text-gold-500 transition-colors">All Garments</a></li>
+        <li><a routerLink="/shop" [queryParams]="{ category: 'coats-jackets' }" class="hover:text-gold-500 transition-colors">Coats & Jackets</a></li>
+        <li><a routerLink="/shop" [queryParams]="{ category: 'suits-blazers' }" class="hover:text-gold-500 transition-colors">Suits & Blazers</a></li>
+        <li><a routerLink="/shop" [queryParams]="{ category: 'shoes' }" class="hover:text-gold-500 transition-colors">Footwear</a></li>
+      </ul>
+    </div>
+
+    <!-- Services Column -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase font-display">CUSTOMER SERVICE</h4>
+      <ul class="flex flex-col gap-2 text-xs font-light text-charcoal-350 list-none p-0 m-0">
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Shipping & Returns</a></li>
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Sizing Consultations</a></li>
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Bespoke Tailoring</a></li>
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Contact Atelier</a></li>
+      </ul>
+    </div>
+
+    <!-- Socials Column -->
+    <div class="flex flex-col gap-3">
+      <h4 class="text-xs font-bold text-gold-500 tracking-widest uppercase font-display">CONNECT</h4>
+      <ul class="flex flex-col gap-2 text-xs font-light text-charcoal-350 list-none p-0 m-0">
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Instagram</a></li>
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Pinterest</a></li>
+        <li><a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">Editorial Journal</a></li>
+        <li><a routerLink="/admin/login" class="hover:text-gold-500 transition-colors">Staff Portal</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- Copyright -->
+  <div class="max-w-7xl mx-auto border-t border-charcoal-850/50 mt-12 pt-6 flex flex-col sm:flex-row items-center justify-between text-[10px] text-charcoal-500 tracking-widest uppercase gap-4">
+    <span>SWAGGEDUP MENSWEAR. &copy; 2026. ALL RIGHTS RESERVED.</span>
+    <div class="flex gap-6">
+      <a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">PRIVACY POLICY</a>
+      <a href="#" (click)="$event.preventDefault()" class="hover:text-gold-500 transition-colors">TERMS OF SERVICE</a>
+    </div>
+  </div>
+</footer>

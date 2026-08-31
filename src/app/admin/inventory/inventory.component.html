@@ -1,0 +1,114 @@
+<div class="mb-10">
+  <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">Variant-Level Log</span>
+  <h1 class="text-3xl font-bold tracking-wide uppercase font-display">INVENTORY TRACKING</h1>
+</div>
+
+<!-- Search & Filtering Panel -->
+<div class="glass-panel p-6 mb-8 flex flex-col md:flex-row md:items-center justify-between gap-6">
+  <div class="flex flex-wrap gap-4 items-center flex-grow">
+    <!-- Search field -->
+    <div class="w-full sm:w-64">
+      <input 
+        type="text" 
+        [(ngModel)]="searchQuery" 
+        (ngModelChange)="applyFilters()"
+        placeholder="Search name or SKU..." 
+        class="w-full bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+      />
+    </div>
+
+    <!-- Category selector -->
+    <div class="w-full sm:w-48">
+      <select 
+        [(ngModel)]="selectedCategory" 
+        (change)="applyFilters()"
+        class="w-full bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-3 focus:outline-none focus:border-gold-500 cursor-pointer font-light"
+      >
+        <option value="">All Categories</option>
+        <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.name }}</option>
+      </select>
+    </div>
+
+    <!-- Low stock only check -->
+    <label class="flex items-center text-xs tracking-wider uppercase font-medium cursor-pointer text-charcoal-350 hover:text-gold-500 transition-colors select-none">
+      <input 
+        type="checkbox" 
+        [(ngModel)]="showLowStockOnly" 
+        (change)="applyFilters()" 
+        class="mr-3 accent-gold-500" 
+      />
+      LOW STOCK ALERT (≤ 5)
+    </label>
+  </div>
+
+  <button 
+    (click)="resetFilters()"
+    class="border border-charcoal-850 hover:bg-charcoal-900 text-charcoal-300 text-xs font-bold tracking-widest px-6 py-3 uppercase transition-all cursor-pointer"
+  >
+    RESET
+  </button>
+</div>
+
+<!-- Loading state -->
+<div *ngIf="loading" class="animate-pulse bg-charcoal-900 h-96 border border-charcoal-800 rounded"></div>
+
+<!-- Inventory Rows Panel -->
+<div *ngIf="!loading" class="glass-panel overflow-hidden">
+  <div *ngIf="filteredRows.length === 0" class="text-center py-20 text-charcoal-400 font-light text-sm">
+    No variant inventory rows match the search query.
+  </div>
+
+  <div class="overflow-x-auto" *ngIf="filteredRows.length > 0">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="text-[10px] text-charcoal-400 tracking-widest uppercase border-b border-charcoal-800 bg-charcoal-900/40">
+          <th class="py-4 px-6">SKU</th>
+          <th class="py-4 px-6">Product</th>
+          <th class="py-4 px-6">Category</th>
+          <th class="py-4 px-6">Size</th>
+          <th class="py-4 px-6">Unit Price</th>
+          <th class="py-4 px-6">Stock Status</th>
+        </tr>
+      </thead>
+      <tbody class="text-xs font-light divide-y divide-charcoal-850/50">
+        <tr *ngFor="let row of filteredRows" class="hover:bg-charcoal-900/10">
+          <!-- SKU -->
+          <td class="py-4 px-6 font-mono tracking-wider font-bold">
+            {{ row.sku }}
+          </td>
+          <!-- Product Name -->
+          <td class="py-4 px-6">
+            <a [routerLink]="['/shop', row.productSlug]" class="text-sm font-bold text-ivory hover:text-gold-500 transition-colors uppercase font-display">
+              {{ row.productName }}
+            </a>
+          </td>
+          <!-- Category -->
+          <td class="py-4 px-6 text-charcoal-400 uppercase tracking-widest text-[10px]">
+            {{ row.categoryName }}
+          </td>
+          <!-- Size -->
+          <td class="py-4 px-6 text-gold-500 font-bold">
+            {{ row.size }}
+          </td>
+          <!-- Price -->
+          <td class="py-4 px-6 text-charcoal-350">
+            {{ row.price | currency:'INR':'symbol':'1.0-0' }}
+          </td>
+          <!-- Stock with low stock indication -->
+          <td class="py-4 px-6">
+            <span 
+              [ngClass]="{
+                'text-red-500 font-bold bg-red-500/5 px-2.5 py-1 border border-red-500/20': row.stock === 0,
+                'text-yellow-500 font-semibold bg-yellow-500/5 px-2.5 py-1 border border-yellow-500/20': row.stock > 0 && row.stock <= 5,
+                'text-green-500 bg-green-500/5 px-2.5 py-1 border border-green-500/10': row.stock > 5
+              }"
+              class="rounded text-[9px] uppercase tracking-wider font-bold"
+            >
+              {{ row.stock === 0 ? 'OUT OF STOCK' : row.stock + ' UNITS LEFT' }}
+            </span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

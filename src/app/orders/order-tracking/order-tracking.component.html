@@ -1,0 +1,166 @@
+<div class="min-h-screen py-16 px-4 max-w-5xl mx-auto">
+  <!-- Loading state -->
+  <app-loading-spinner *ngIf="loading"></app-loading-spinner>
+
+  <!-- Main Order Panel -->
+  <div *ngIf="!loading && order" class="animate-fade-in flex flex-col gap-10">
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-end justify-between border-b border-charcoal-850 pb-6">
+      <div>
+        <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">
+          Thank you for your order
+        </span>
+        <h1 class="text-2xl md:text-4xl font-bold text-ivory tracking-wide uppercase font-display">
+          ORDER #{{ order.orderNumber }}
+        </h1>
+        <p class="text-charcoal-450 text-xs mt-1 font-light">
+          Placed on {{ order.createdAt | date:'medium' }}
+        </p>
+      </div>
+      <div class="mt-4 md:mt-0 flex gap-4">
+        <a 
+          routerLink="/shop"
+          class="border border-charcoal-800 text-charcoal-350 hover:border-gold-500 hover:text-gold-500 text-[10px] tracking-widest uppercase px-6 py-3 transition-colors"
+        >
+          CONTINUE SHOPPING
+        </a>
+      </div>
+    </div>
+
+    <!-- Status Tracking Bar -->
+    <div class="glass-panel p-8 md:p-10">
+      <h3 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-8 font-display">
+        DELIVERY TRACKING
+      </h3>
+
+      <div class="relative flex justify-between max-w-3xl mx-auto">
+        <!-- Connecting Line -->
+        <div class="absolute top-5 left-0 right-0 h-[2px] bg-charcoal-800 z-0"></div>
+        <div class="absolute top-5 left-0 h-[2px] bg-gold-500 z-0 transition-all duration-500"
+             [style.width.%]="order.status === 'CANCELLED' ? 0 : (getStatusStep(order.status) - 1) * 33.33"></div>
+
+        <!-- Steps -->
+        <div *ngFor="let step of [
+          { name: 'PENDING', desc: 'Order Placed' },
+          { name: 'PROCESSING', desc: 'Tailoring / Packaging' },
+          { name: 'SHIPPED', desc: 'In Transit' },
+          { name: 'DELIVERED', desc: 'Delivered' }
+        ]; let idx = index" class="relative z-10 flex flex-col items-center">
+          <div 
+            [ngClass]="{
+              'bg-gold-500 text-charcoal-900 font-bold border-gold-500 shadow-[0_0_12px_rgba(197,168,128,0.4)]': getStatusStep(order.status) >= (idx + 1) && order.status !== 'CANCELLED',
+              'bg-charcoal-900 border-charcoal-800 text-charcoal-500': getStatusStep(order.status) < (idx + 1) || order.status === 'CANCELLED'
+            }"
+            class="w-10 h-10 rounded-full border-2 flex items-center justify-center text-xs transition-all duration-300"
+          >
+            <span>{{ idx + 1 }}</span>
+          </div>
+          <span 
+            [ngClass]="{
+              'text-gold-500 font-bold': getStatusStep(order.status) === (idx + 1) && order.status !== 'CANCELLED',
+              'text-ivory': getStatusStep(order.status) > (idx + 1) && order.status !== 'CANCELLED',
+              'text-charcoal-500': getStatusStep(order.status) < (idx + 1) || order.status === 'CANCELLED'
+            }"
+            class="text-[10px] uppercase tracking-widest mt-3 font-display text-center hidden sm:block"
+          >
+            {{ step.desc }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Cancelled State -->
+      <div *ngIf="order.status === 'CANCELLED'" class="mt-8 text-center text-red-500 text-xs font-bold tracking-widest uppercase">
+        &otimes; THIS ORDER HAS BEEN CANCELLED
+      </div>
+    </div>
+
+    <!-- Details Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-10">
+      <!-- Items Summary List -->
+      <div class="md:col-span-2 glass-panel p-6">
+        <h3 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3">
+          ORDERED GARMENTS
+        </h3>
+        <div class="flex flex-col gap-6">
+          <div *ngFor="let item of order.items" class="flex gap-4 border-b border-charcoal-850/50 pb-4 last:border-0 last:pb-0">
+            <div class="w-14 aspect-[3/4] bg-charcoal-950 border border-charcoal-800 overflow-hidden flex-shrink-0">
+              <img src="https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800" [alt]="item.productName" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-grow">
+              <h4 class="text-xs font-bold text-ivory font-display tracking-widest uppercase">{{ item.productName }}</h4>
+              <p class="text-[9px] text-charcoal-450 mt-1 font-mono uppercase">SKU: {{ item.sku }}</p>
+              <p class="text-[10px] text-charcoal-400">Size: <span class="text-gold-500 font-bold">{{ item.size }}</span></p>
+              <p class="text-[10px] text-charcoal-400">Qty: <span class="text-ivory">{{ item.quantity }}</span></p>
+            </div>
+            <div class="text-xs font-bold text-gold-500 self-center">
+              {{ (item.price * item.quantity) | currency:'INR':'symbol':'1.0-0' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Summary Details -->
+      <div class="flex flex-col gap-6">
+        <!-- Shipping details card -->
+        <div class="glass-panel p-6">
+          <h3 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-4 font-display border-b border-charcoal-850 pb-3">
+            SHIPPING DETAILS
+          </h3>
+          <div class="text-xs font-light text-charcoal-300 space-y-2 leading-relaxed">
+            <span class="text-ivory font-bold block uppercase tracking-wide">{{ order.customerName }}</span>
+            <span>{{ order.addressLine1 }}</span>
+            <span *ngIf="order.addressLine2" class="block">{{ order.addressLine2 }}</span>
+            <span class="block">{{ order.city }}, {{ order.state }} - {{ order.postalCode }}</span>
+            <span class="block">{{ order.country }}</span>
+            <span class="block mt-3 text-charcoal-450">Phone: {{ order.customerPhone }}</span>
+            <span class="block text-charcoal-450">Email: {{ order.customerEmail }}</span>
+          </div>
+        </div>
+
+        <!-- Payment details card -->
+        <div class="glass-panel p-6">
+          <h3 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-4 font-display border-b border-charcoal-850 pb-3">
+            PAYMENT INFO
+          </h3>
+          <div class="text-xs font-light text-charcoal-300 space-y-3">
+            <div class="flex justify-between">
+              <span>Payment Method:</span>
+              <span class="text-ivory font-bold uppercase tracking-wider">{{ order.paymentMethod }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Payment Status:</span>
+              <span 
+                [ngClass]="{
+                  'text-green-500 font-bold': order.paymentStatus === 'PAID',
+                  'text-yellow-500': order.paymentStatus === 'PENDING',
+                  'text-red-500': order.paymentStatus === 'FAILED'
+                }"
+                class="uppercase tracking-wider font-semibold text-[10px]"
+              >
+                {{ order.paymentStatus }}
+              </span>
+            </div>
+
+            <hr class="border-charcoal-850/50 my-2" />
+
+            <div class="flex justify-between">
+              <span>Subtotal:</span>
+              <span class="text-charcoal-250">{{ order.subtotal | currency:'INR':'symbol':'1.0-0' }}</span>
+            </div>
+            <div class="flex justify-between">
+              <span>Shipping Fee:</span>
+              <span class="text-charcoal-250" *ngIf="order.shippingAmount > 0">{{ order.shippingAmount | currency:'INR':'symbol':'1.0-0' }}</span>
+              <span class="text-green-500 font-bold" *ngIf="order.shippingAmount === 0">FREE</span>
+            </div>
+            <div class="flex justify-between items-center text-sm font-bold mt-2">
+              <span class="text-ivory tracking-widest font-display">TOTAL</span>
+              <span class="text-gold-500 font-display">
+                {{ order.totalAmount | currency:'INR':'symbol':'1.0-0' }}
+              </span>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

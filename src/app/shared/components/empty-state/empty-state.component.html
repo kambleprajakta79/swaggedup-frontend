@@ -1,0 +1,25 @@
+<div class="flex flex-col items-center justify-center text-center p-12 border border-charcoal-850 bg-charcoal-900/10 max-w-lg mx-auto my-8">
+  <div class="text-4xl mb-4 select-none">{{ icon }}</div>
+  <h3 class="text-lg font-display tracking-widest text-ivory uppercase font-bold mb-2">
+    {{ title }}
+  </h3>
+  <p class="text-xs text-charcoal-400 font-light max-w-sm mb-6 leading-relaxed">
+    {{ message }}
+  </p>
+  
+  <a 
+    *ngIf="actionLink && !actionClick.observed" 
+    [routerLink]="actionLink"
+    class="border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-charcoal-900 font-display text-[10px] font-bold tracking-widest px-6 py-3 uppercase transition-colors"
+  >
+    {{ actionText }}
+  </a>
+
+  <button 
+    *ngIf="actionClick.observed" 
+    (click)="onAction()"
+    class="border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-charcoal-900 font-display text-[10px] font-bold tracking-widest px-6 py-3 uppercase transition-colors cursor-pointer"
+  >
+    {{ actionText }}
+  </button>
+</div>

@@ -1,0 +1,152 @@
+@import url('https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800&family=Outfit:wght@300;400;500;600;700;800&display=swap');
+@import 'tailwindcss';
+
+@theme {
+  --font-display: 'Cinzel', serif;
+  --font-sans: 'Outfit', sans-serif;
+
+  --color-gold-50: #faf7f2;
+  --color-gold-100: #f3ebd9;
+  --color-gold-200: #e7d8b5;
+  --color-gold-300: #d7be8a;
+  --color-gold-400: #c5a260;
+  --color-gold-500: #c5a880; /* Primary Brand Gold */
+  --color-gold-600: #a78749;
+  --color-gold-700: #88693a;
+  --color-gold-800: #6a4f2e;
+  --color-gold-900: #553e25;
+
+  /* Redefined for Clean Light Theme (Myntra inspired) */
+  --color-charcoal-50: #0a0a0a;
+  --color-charcoal-100: #121212;
+  --color-charcoal-200: #1a1a1a;
+  --color-charcoal-300: #282c3f; /* Primary dark text */
+  --color-charcoal-400: #7e8190; /* Secondary gray text */
+  --color-charcoal-450: #9496a5; /* Muted gray text */
+  --color-charcoal-500: #a9abb7; /* Muted gray text */
+  --color-charcoal-600: #dbdbdf; /* Light borders */
+  --color-charcoal-700: #eaeaec; /* Light borders */
+  --color-charcoal-800: #f0f0f2; /* Light secondary bg */
+  --color-charcoal-850: #f5f5f7; /* Light borders/bg */
+  --color-charcoal-900: #fafafc; /* Light card bg */
+  --color-charcoal-950: #ffffff; /* Main page bg */
+
+  --color-ivory: #282c3f; /* Text is dark gray */
+  --color-brass: #b59975;
+}
+
+/* Custom Scrollbar */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #fafafc;
+}
+::-webkit-scrollbar-thumb {
+  background: #c5a880;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #b59975;
+}
+
+/* Custom Global Styles */
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  background-color: #ffffff;
+  color: #282c3f;
+  font-family: 'Outfit', sans-serif;
+  overflow-x: hidden;
+}
+
+h1, h2, h3, h4, h5, h6, .font-editorial {
+  font-family: 'Cinzel', serif;
+  color: #282c3f;
+}
+
+/* Glassmorphism utility updated for light theme */
+.glass-panel {
+  background: rgba(255, 255, 255, 0.75);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.02);
+}
+
+.glass-nav {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.02);
+}
+
+/* Subtle animations */
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(15px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+/* Hover effects */
+.hover-gold-glow:hover {
+  box-shadow: 0 0 15px rgba(197, 168, 128, 0.15);
+  border-color: #c5a880;
+}
+
+/* Ensure text contrast on dark/gold backgrounds */
+.text-charcoal-900,
+.text-charcoal-950 {
+  color: #111111 !important;
+}
+
+/* Alert/Toast overrides to ensure text remains readable */
+.toast-success {
+  background-color: #ffffff !important;
+  color: #22c55e !important;
+}
+.toast-error {
+  background-color: #ffffff !important;
+  color: #ef4444 !important;
+}
+
+/* Form inputs light mode style safety overrides */
+input[type="text"],
+input[type="email"],
+input[type="password"],
+input[type="number"],
+input[type="tel"],
+input[type="search"],
+select,
+textarea {
+  background-color: #ffffff !important;
+  color: #282c3f !important;
+  border-color: #eaeaec !important;
+}
+
+input[type="text"]:focus,
+input[type="email"]:focus,
+input[type="password"]:focus,
+input[type="number"]:focus,
+input[type="tel"]:focus,
+input[type="search"]:focus,
+select:focus,
+textarea:focus {
+  border-color: #c5a880 !important;
+  box-shadow: 0 0 0 2px rgba(197, 168, 128, 0.15) !important;
+  outline: none !important;
+}
+
+/* Override placeholder colors for inputs to ensure readability */
+input::placeholder,
+textarea::placeholder {
+  color: #9496a5 !important;
+  opacity: 1 !important;
+}

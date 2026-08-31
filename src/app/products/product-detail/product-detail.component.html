@@ -1,0 +1,178 @@
+<div class="min-h-screen py-12 px-4 max-w-7xl mx-auto">
+  <!-- Breadcrumb -->
+  <nav *ngIf="product" class="text-xs text-charcoal-400 mb-8 tracking-widest uppercase">
+    <a routerLink="/" class="hover:text-gold-500 transition-colors">HOME</a>
+    <span class="mx-2">&bull;</span>
+    <a routerLink="/shop" class="hover:text-gold-500 transition-colors">SHOP</a>
+    <span class="mx-2">&bull;</span>
+    <span class="text-charcoal-300">{{ product.category?.name }}</span>
+    <span class="mx-2">&bull;</span>
+    <span class="text-gold-500 font-medium">{{ product.name }}</span>
+  </nav>
+
+  <!-- Loader -->
+  <div *ngIf="loading" class="flex flex-col lg:flex-row gap-12 animate-pulse">
+    <div class="w-full lg:w-1/2 bg-charcoal-800 h-[60vh] border border-charcoal-800"></div>
+    <div class="w-full lg:w-1/2 flex flex-col gap-6">
+      <div class="h-6 bg-charcoal-800 w-1/4"></div>
+      <div class="h-10 bg-charcoal-800 w-3/4"></div>
+      <div class="h-6 bg-charcoal-800 w-1/3"></div>
+      <div class="h-32 bg-charcoal-800"></div>
+    </div>
+  </div>
+
+  <!-- Product Details Grid -->
+  <div *ngIf="!loading && product" class="flex flex-col lg:flex-row gap-12 mb-24">
+    <!-- Left Column: Image Gallery -->
+    <div class="w-full lg:w-1/2 flex flex-col gap-4">
+      <!-- Main Image -->
+      <div class="border border-charcoal-800 overflow-hidden aspect-[3/4] bg-charcoal-900 flex items-center justify-center relative">
+        <img 
+          [src]="selectedImage || 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800'" 
+          [alt]="product.name"
+          class="w-full h-full object-cover transition-all duration-300"
+        />
+      </div>
+      <!-- Thumbnails -->
+      <div *ngIf="product && product.images && product.images.length > 1" class="flex gap-4">
+        <button 
+          *ngFor="let img of product.images" 
+          (click)="selectedImage = img"
+          [ngClass]="{
+            'border-gold-500': selectedImage === img,
+            'border-charcoal-800 opacity-60 hover:opacity-100': selectedImage !== img
+          }"
+          class="w-24 aspect-[3/4] overflow-hidden border bg-charcoal-900 transition-all cursor-pointer"
+        >
+          <img [src]="img" [alt]="product.name" class="w-full h-full object-cover" />
+        </button>
+      </div>
+    </div>
+
+    <!-- Right Column: Product Info -->
+    <div class="w-full lg:w-1/2 flex flex-col">
+      <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold mb-2 block">
+        {{ product.category?.name }}
+      </span>
+      <h1 class="text-3xl md:text-4xl font-bold text-ivory tracking-wide uppercase mb-4">
+        {{ product.name }}
+      </h1>
+      
+      <!-- Price -->
+      <div class="text-2xl font-semibold text-gold-500 mb-6">
+        {{ product.basePrice | currency:'INR':'symbol':'1.0-0' }}
+      </div>
+
+      <hr class="border-charcoal-800 mb-6"/>
+
+      <!-- Description -->
+      <p class="text-charcoal-300 font-light text-sm md:text-base leading-relaxed mb-6">
+        {{ product.description }}
+      </p>
+
+      <!-- Specifications -->
+      <div class="grid grid-cols-2 gap-4 text-xs tracking-widest uppercase mb-8 border border-charcoal-800/40 p-4 bg-charcoal-900/10">
+        <div>
+          <span class="text-charcoal-400 font-medium block">Brand</span>
+          <span class="text-ivory mt-1 block">{{ product.brand || 'SWAGGER & CO' }}</span>
+        </div>
+        <div>
+          <span class="text-charcoal-400 font-medium block">Material</span>
+          <span class="text-ivory mt-1 block">{{ product.material || 'Premium Fabrics' }}</span>
+        </div>
+        <div class="col-span-2">
+          <span class="text-charcoal-400 font-medium block">Color</span>
+          <span class="text-ivory mt-1 block">{{ product.color || 'Tailored Shade' }}</span>
+        </div>
+      </div>
+
+      <!-- Size Selection -->
+      <div class="mb-6">
+        <h3 class="text-xs font-bold text-gold-500 tracking-widest uppercase mb-3">SELECT SIZE</h3>
+        <div class="flex flex-wrap gap-3">
+          <button 
+            *ngFor="let variant of product.variants" 
+            (click)="selectVariant(variant)"
+            [disabled]="variant.stock === 0"
+            [ngClass]="{
+              'border-gold-500 text-gold-500 bg-gold-500/10 font-bold': selectedVariant?.id === variant.id,
+              'border-charcoal-800 text-charcoal-350 hover:border-charcoal-600': selectedVariant?.id !== variant.id && variant.stock > 0,
+              'border-charcoal-900 text-charcoal-600 cursor-not-allowed opacity-30 line-through': variant.stock === 0
+            }"
+            class="border px-5 py-3 text-xs tracking-wider uppercase transition-all duration-200 cursor-pointer"
+          >
+            {{ variant.size }}
+          </button>
+        </div>
+      </div>
+
+      <!-- Stock Status -->
+      <div class="mb-6 h-6 flex items-center">
+        <span *ngIf="!selectedVariant" class="text-xs text-charcoal-400 font-light italic">
+          Select a size to view availability.
+        </span>
+        <span *ngIf="selectedVariant && selectedVariant.stock <= 5 && selectedVariant.stock > 0" class="text-xs text-gold-500 font-semibold tracking-wider">
+          Only {{ selectedVariant.stock }} left in stock! Order soon.
+        </span>
+        <span *ngIf="selectedVariant && selectedVariant.stock > 5" class="text-xs text-charcoal-300 font-light tracking-wider">
+          In Stock. Ships in 24 hours.
+        </span>
+      </div>
+
+      <!-- Quantity Selector & Action Buttons -->
+      <div class="flex flex-col sm:flex-row items-stretch gap-4">
+        <!-- Quantity counter -->
+        <div class="flex items-center border border-charcoal-800 justify-between w-32 flex-shrink-0 bg-charcoal-900/50">
+          <button 
+            (click)="changeQuantity(-1)" 
+            [disabled]="!selectedVariant || quantity <= 1"
+            class="px-4 py-3 text-charcoal-400 hover:text-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          >
+            &minus;
+          </button>
+          <span class="text-xs font-bold text-ivory">{{ quantity }}</span>
+          <button 
+            (click)="changeQuantity(1)" 
+            [disabled]="!selectedVariant || quantity >= selectedVariant.stock"
+            class="px-4 py-3 text-charcoal-400 hover:text-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors cursor-pointer"
+          >
+            &plus;
+          </button>
+        </div>
+
+        <!-- Add to Cart -->
+        <button 
+          (click)="addToCart()"
+          class="flex-grow border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-charcoal-900 transition-all duration-300 font-display tracking-widest text-xs font-bold px-6 py-4 uppercase hover-gold-glow cursor-pointer"
+        >
+          ADD TO CART
+        </button>
+
+        <!-- Buy Now -->
+        <button 
+          (click)="buyNow()"
+          class="flex-grow bg-gold-500 text-charcoal-900 hover:bg-gold-600 transition-colors font-display tracking-widest text-xs font-bold px-6 py-4 uppercase cursor-pointer"
+        >
+          BUY NOW
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Related Products -->
+  <section *ngIf="!loading && relatedProducts.length > 0" class="border-t border-charcoal-850 pt-16">
+    <div class="text-center mb-12">
+      <span class="text-gold-500 text-xs tracking-[0.3em] uppercase block mb-1">Tailored Styling</span>
+      <h2 class="text-2xl md:text-3xl font-bold text-ivory tracking-wider uppercase">RELATED PIECES</h2>
+      <div class="w-12 h-[2px] bg-gold-500 mx-auto mt-2"></div>
+    </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8">
+      <app-product-card 
+        *ngFor="let p of relatedProducts" 
+        [product]="p"
+        (quickAdd)="quickAdd($event)"
+      ></app-product-card>
+    </div>
+  </section>
+</div>

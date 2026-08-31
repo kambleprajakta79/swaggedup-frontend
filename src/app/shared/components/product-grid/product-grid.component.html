@@ -1,0 +1,20 @@
+<!-- Loading Skeletons -->
+<app-skeleton-loader *ngIf="loading" type="grid" [count]="8"></app-skeleton-loader>
+
+<!-- Empty State -->
+<app-empty-state 
+  *ngIf="!loading && products.length === 0" 
+  title="No Garments Found" 
+  message="There are no items matching this filter combination. Try resetting your search parameters."
+  actionText="Clear Filter Settings"
+  actionLink="/shop"
+></app-empty-state>
+
+<!-- Grid of cards -->
+<div *ngIf="!loading && products.length > 0" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 w-full">
+  <app-product-card 
+    *ngFor="let product of products" 
+    [product]="product"
+    (quickAdd)="onQuickAdd($event)"
+  ></app-product-card>
+</div>

@@ -1,0 +1,438 @@
+<div class="flex flex-col sm:flex-row sm:items-center justify-between mb-10 gap-4">
+  <div>
+    <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">Inventory Management</span>
+    <h1 class="text-3xl font-bold tracking-wide uppercase font-display">PRODUCT CATALOG</h1>
+  </div>
+  <button 
+    (click)="openAddModal()"
+    class="bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest uppercase px-6 py-3.5 hover:bg-gold-600 transition-all hover-gold-glow flex items-center gap-2 cursor-pointer"
+  >
+    <span>+</span> ADD NEW PRODUCT
+  </button>
+</div>
+
+<!-- Loading State -->
+<div *ngIf="loading" class="animate-pulse bg-charcoal-900 h-96 border border-charcoal-800 rounded"></div>
+
+<!-- Products List Card -->
+<div *ngIf="!loading" class="glass-panel overflow-hidden">
+  <!-- Empty State -->
+  <div *ngIf="products.length === 0" class="text-center py-20 text-charcoal-400 font-light text-sm">
+    No products in catalog. Click "Add New Product" to seed items.
+  </div>
+
+  <!-- Products Table -->
+  <div class="overflow-x-auto" *ngIf="products.length > 0">
+    <table class="w-full text-left border-collapse">
+      <thead>
+        <tr class="text-[10px] text-charcoal-400 tracking-widest uppercase border-b border-charcoal-800 bg-charcoal-900/40">
+          <th class="py-4 px-6">Image</th>
+          <th class="py-4 px-6">Product</th>
+          <th class="py-4 px-6">Category</th>
+          <th class="py-4 px-6">Price</th>
+          <th class="py-4 px-6">Stock</th>
+          <th class="py-4 px-6">Status</th>
+          <th class="py-4 px-6 text-right">Actions</th>
+        </tr>
+      </thead>
+      <tbody class="text-xs font-light divide-y divide-charcoal-850/50">
+        <tr *ngFor="let product of products" class="hover:bg-charcoal-900/10">
+          <!-- Image -->
+          <td class="py-4 px-6">
+            <div class="w-12 aspect-[3/4] overflow-hidden border border-charcoal-800 bg-charcoal-950">
+              <img [src]="product.images?.[0] || 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800'" [alt]="product.name" class="w-full h-full object-cover" />
+            </div>
+          </td>
+          <!-- Product info -->
+          <td class="py-4 px-6">
+            <span class="text-sm font-bold text-ivory block truncate max-w-[200px]">{{ product.name }}</span>
+            <span class="text-[10px] text-charcoal-450 mt-1 block">Brand: {{ product.brand || 'SWAGGER & CO' }}</span>
+          </td>
+          <!-- Category -->
+          <td class="py-4 px-6 uppercase tracking-wider text-[10px] font-medium text-charcoal-350">
+            {{ product.category?.name }}
+          </td>
+          <!-- Price -->
+          <td class="py-4 px-6 font-medium text-gold-500">
+            {{ product.basePrice | currency:'INR':'symbol':'1.0-0' }}
+          </td>
+          <!-- Stock (Sum of variants) -->
+          <td class="py-4 px-6">
+            <span 
+              [ngClass]="{
+                'text-red-500 font-bold': sumStock(product) === 0,
+                'text-yellow-500': sumStock(product) > 0 && sumStock(product) <= 15,
+                'text-charcoal-300': sumStock(product) > 15
+              }"
+            >
+              {{ sumStock(product) }} units
+            </span>
+          </td>
+          <!-- Status Toggle -->
+          <td class="py-4 px-6">
+            <button 
+              (click)="toggleActive(product, $event)"
+              [ngClass]="{
+                'bg-green-500/10 border-green-500/30 text-green-500': product.isActive,
+                'bg-charcoal-900 border-charcoal-850 text-charcoal-450': !product.isActive
+              }"
+              class="border px-2.5 py-1 rounded text-[9px] font-bold tracking-widest uppercase transition-all cursor-pointer"
+            >
+              {{ product.isActive ? 'ACTIVE' : 'INACTIVE' }}
+            </button>
+          </td>
+          <!-- Actions -->
+          <td class="py-4 px-6 text-right flex gap-3 justify-end items-center">
+            <button 
+              (click)="openEditModal(product)"
+              class="border border-charcoal-800 text-charcoal-300 hover:border-gold-500 hover:text-gold-500 text-[10px] tracking-widest uppercase px-3 py-1.5 transition-all cursor-pointer"
+            >
+              EDIT
+            </button>
+            <button 
+              (click)="deleteProduct(product.id, $event)"
+              class="border border-charcoal-800 text-charcoal-300 hover:border-red-500 hover:text-red-500 text-[10px] tracking-widest uppercase px-3 py-1.5 transition-all cursor-pointer"
+            >
+              DELETE
+            </button>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<!-- Add/Edit Product Modal Dialog -->
+<div 
+  *ngIf="showModal" 
+  class="fixed inset-0 bg-black/70 backdrop-blur-sm z-[9998] flex items-center justify-center p-4 overflow-y-auto animate-fade-in"
+>
+  <div class="w-full max-w-4xl bg-charcoal-900 border border-charcoal-800 rounded-lg shadow-2xl overflow-hidden max-h-[90vh] flex flex-col z-[9999]">
+    <!-- Modal Header -->
+    <div class="flex items-center justify-between p-6 border-b border-charcoal-800">
+      <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase font-display">
+        {{ editingProduct ? 'EDIT PRODUCT CATALOG DETAILS' : 'ADD NEW MENSWEAR PRODUCT' }}
+      </h3>
+      <button 
+        (click)="closeModal()"
+        class="text-charcoal-400 hover:text-gold-500 transition-colors text-2xl font-light cursor-pointer"
+      >
+        &times;
+      </button>
+    </div>
+
+    <!-- Modal Scrollable Content -->
+    <div class="flex-grow overflow-y-auto p-6 md:p-8 flex flex-col gap-8" [formGroup]="productForm">
+      <!-- Section 1: Core Details -->
+      <div>
+        <h4 class="text-xs font-bold text-ivory tracking-widest uppercase mb-4 font-display border-b border-charcoal-850 pb-2">
+          1. CORE DETAILS
+        </h4>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Name -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PRODUCT NAME *</label>
+            <input 
+              type="text" 
+              formControlName="name"
+              placeholder="e.g. Midnight Tailored Blazer" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <!-- Base Price -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">BASE PRICE (INR) *</label>
+            <input 
+              type="number" 
+              formControlName="basePrice"
+              placeholder="8999" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <!-- Description -->
+          <div class="col-span-2">
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">DESCRIPTION *</label>
+            <textarea 
+              formControlName="description"
+              rows="3"
+              placeholder="Detailed description of tailoring, styling, and cut..."
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light resize-none"
+            ></textarea>
+          </div>
+
+          <!-- Category -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">CATEGORY *</label>
+            <select 
+              formControlName="categoryId"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3.5 focus:outline-none focus:border-gold-500 transition-all font-light cursor-pointer"
+            >
+              <option value="" disabled selected>Select Category</option>
+              <option *ngFor="let cat of categories" [value]="cat.id">{{ cat.name }}</option>
+            </select>
+          </div>
+
+          <!-- Brand -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">BRAND</label>
+            <input 
+              type="text" 
+              formControlName="brand"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <!-- Material -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">MATERIAL SPECIFICATION</label>
+            <input 
+              type="text" 
+              formControlName="material"
+              placeholder="e.g. 100% Cashmere" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <!-- Color -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">COLOR SHADE</label>
+            <input 
+              type="text" 
+              formControlName="color"
+              placeholder="e.g. Obsidian Black" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <!-- Product Images Upload -->
+          <div class="col-span-2">
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">
+              PRODUCT IMAGES * (MAX 5 IMAGES, FIRST IMAGE IS PRIMARY)
+            </label>
+            
+            <div class="flex flex-col gap-4">
+              <!-- Upload Dropzone -->
+              <div 
+                class="border border-dashed border-charcoal-800 hover:border-gold-500/50 bg-charcoal-950/20 rounded p-6 text-center transition-all cursor-pointer relative"
+              >
+                <input 
+                  type="file" 
+                  multiple 
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  (change)="onFileSelected($event)"
+                  class="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                  [disabled]="uploadedImages.length >= 5 || processingImages"
+                />
+                <div class="flex flex-col items-center justify-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gold-500 animate-pulse" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                  </svg>
+                  <span class="text-charcoal-350 text-xs font-light tracking-wider">
+                    Drag & drop images here or <span class="text-gold-500 font-semibold underline">Browse Images</span>
+                  </span>
+                  <span class="text-[9px] text-charcoal-500 tracking-wider font-light uppercase">
+                    JPG, PNG, WEBP — Max 5MB per image (Total max 15MB)
+                  </span>
+                </div>
+              </div>
+
+              <!-- Loader during compression -->
+              <div *ngIf="processingImages" class="flex items-center justify-center gap-3 bg-charcoal-900/60 p-4 border border-charcoal-850 rounded">
+                <span class="w-4 h-4 border-2 border-gold-500 border-t-transparent rounded-full animate-spin"></span>
+                <span class="text-xs text-gold-500 tracking-widest uppercase font-light">Optimizing & compressing images...</span>
+              </div>
+
+              <!-- Previews Grid -->
+              <div *ngIf="uploadedImages.length > 0" class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+                <div 
+                  *ngFor="let img of uploadedImages; let i = index" 
+                  class="relative aspect-[3/4] border border-charcoal-800 bg-charcoal-950/60 group overflow-hidden rounded transition-all duration-300 hover:border-gold-500/40"
+                >
+                  <img [src]="img" class="w-full h-full object-cover" />
+                  
+                  <!-- Primary indicator -->
+                  <div 
+                    *ngIf="i === 0" 
+                    class="absolute top-2 left-2 bg-gold-500 text-charcoal-900 text-[8px] font-bold tracking-widest px-2 py-0.5 uppercase shadow-md rounded-sm"
+                  >
+                    Primary
+                  </div>
+
+                  <!-- Action overlay on hover -->
+                  <div class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-200 flex flex-col justify-between p-2">
+                    <!-- Delete button -->
+                    <div class="flex justify-end">
+                      <button 
+                        type="button"
+                        (click)="removeUploadedImage(i)"
+                        class="bg-red-500/90 text-white rounded p-1 hover:bg-red-600 transition-colors cursor-pointer"
+                        title="Delete Image"
+                      >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor">
+                          <path fill-rule="evenodd" d="M9 2a1 1 0 00-.894.553L7.382 4H4a1 1 0 000 2v10a2 2 0 002 2h8a2 2 0 002-2V6a1 1 0 100-2h-3.382l-.724-1.447A1 1 0 0011 2H9zM7 8a1 1 0 012 0v6a1 1 0 11-2 0V8zm5-1a1 1 0 00-1 1v6a1 1 0 102 0V8a1 1 0 00-1-1z" clip-rule="evenodd" />
+                        </svg>
+                      </button>
+                    </div>
+
+                    <!-- Reorder buttons -->
+                    <div class="flex justify-center gap-3 bg-charcoal-950/80 backdrop-blur-sm py-1 rounded border border-charcoal-850">
+                      <button 
+                        type="button"
+                        [disabled]="i === 0"
+                        (click)="moveUploadedImage(i, 'left')"
+                        class="text-charcoal-300 hover:text-gold-500 disabled:opacity-30 disabled:hover:text-charcoal-300 transition-colors cursor-pointer text-xs px-2 font-bold"
+                        title="Move Left (Prioritize)"
+                      >
+                        &larr;
+                      </button>
+                      <span class="text-charcoal-500 text-[10px] select-none">|</span>
+                      <button 
+                        type="button"
+                        [disabled]="i === uploadedImages.length - 1"
+                        (click)="moveUploadedImage(i, 'right')"
+                        class="text-charcoal-300 hover:text-gold-500 disabled:opacity-30 disabled:hover:text-charcoal-300 transition-colors cursor-pointer text-xs px-2 font-bold"
+                        title="Move Right"
+                      >
+                        &rarr;
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Flags -->
+          <div class="col-span-2 flex flex-wrap gap-6 mt-2">
+            <label class="flex items-center text-xs tracking-wider uppercase font-medium cursor-pointer text-charcoal-300 hover:text-gold-500 transition-all">
+              <input type="checkbox" formControlName="isFeatured" class="mr-3 accent-gold-500" />
+              FEATURED IN CATALOG
+            </label>
+            <label class="flex items-center text-xs tracking-wider uppercase font-medium cursor-pointer text-charcoal-300 hover:text-gold-500 transition-all">
+              <input type="checkbox" formControlName="isNewArrival" class="mr-3 accent-gold-500" />
+              NEW ARRIVAL SHOWCASE
+            </label>
+            <label class="flex items-center text-xs tracking-wider uppercase font-medium cursor-pointer text-charcoal-300 hover:text-gold-500 transition-all">
+              <input type="checkbox" formControlName="isActive" class="mr-3 accent-gold-500" />
+              PRODUCT VISIBILITY ACTIVE
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- Section 2: Variant Inventory Manager -->
+      <div>
+        <h4 class="text-xs font-bold text-ivory tracking-widest uppercase mb-4 font-display border-b border-charcoal-850 pb-2">
+          2. SIZE VARIANTS & INVENTORY
+        </h4>
+
+        <!-- Added Variants List -->
+        <div class="border border-charcoal-800 overflow-hidden mb-6 bg-charcoal-950/20" *ngIf="variants.length > 0">
+          <table class="w-full text-left border-collapse">
+            <thead>
+              <tr class="text-[9px] text-charcoal-400 tracking-widest uppercase border-b border-charcoal-800 bg-charcoal-900/20">
+                <th class="py-2.5 px-4">Size</th>
+                <th class="py-2.5 px-4">SKU</th>
+                <th class="py-2.5 px-4">Price (Override)</th>
+                <th class="py-2.5 px-4">Stock Level</th>
+                <th class="py-2.5 px-4 text-right">Remove</th>
+              </tr>
+            </thead>
+            <tbody class="text-xs divide-y divide-charcoal-850/50">
+              <tr *ngFor="let variant of variants; let i = index">
+                <td class="py-2.5 px-4 font-bold text-gold-500">{{ variant.size }}</td>
+                <td class="py-2.5 px-4 font-mono">{{ variant.sku }}</td>
+                <td class="py-2.5 px-4">{{ variant.price | currency:'INR':'symbol':'1.0-0' }}</td>
+                <td class="py-2.5 px-4">{{ variant.stock }} units</td>
+                <td class="py-2.5 px-4 text-right">
+                  <button 
+                    (click)="removeVariant(i)"
+                    class="text-red-500 hover:text-red-600 transition-colors text-sm font-bold cursor-pointer"
+                  >
+                    &times;
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Add Variant Inline Form -->
+        <div class="border border-charcoal-800 p-4 bg-charcoal-900/30 flex flex-col md:flex-row gap-4 items-end">
+          <div class="w-full md:w-20">
+            <label class="block text-[8px] text-charcoal-400 uppercase tracking-widest mb-1.5 font-semibold">SIZE</label>
+            <input 
+              type="text" 
+              name="newSize"
+              placeholder="e.g. M" 
+              [(ngModel)]="newSize"
+              [ngModelOptions]="{standalone: true}"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2.5 focus:outline-none focus:border-gold-500 transition-all uppercase font-light"
+            />
+          </div>
+
+          <div class="w-full md:flex-grow">
+            <label class="block text-[8px] text-charcoal-400 uppercase tracking-widest mb-1.5 font-semibold">SKU</label>
+            <input 
+              type="text" 
+              name="newSku"
+              placeholder="SKU-MNT-BLZ-M" 
+              [(ngModel)]="newSku"
+              [ngModelOptions]="{standalone: true}"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2.5 focus:outline-none focus:border-gold-500 transition-all uppercase font-light"
+            />
+          </div>
+
+          <div class="w-full md:w-32">
+            <label class="block text-[8px] text-charcoal-400 uppercase tracking-widest mb-1.5 font-semibold">PRICE</label>
+            <input 
+              type="number" 
+              name="newPrice"
+              placeholder="8999" 
+              [(ngModel)]="newPrice"
+              [ngModelOptions]="{standalone: true}"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2.5 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <div class="w-full md:w-24">
+            <label class="block text-[8px] text-charcoal-400 uppercase tracking-widest mb-1.5 font-semibold">STOCK</label>
+            <input 
+              type="number" 
+              name="newStock"
+              placeholder="10" 
+              [(ngModel)]="newStock"
+              [ngModelOptions]="{standalone: true}"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-xs text-ivory px-3 py-2.5 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <button 
+            (click)="addVariant()"
+            class="bg-gold-500 text-charcoal-900 text-xs font-bold px-4 py-3 uppercase hover:bg-gold-600 transition-all flex-shrink-0 cursor-pointer"
+          >
+            ADD SIZE
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal Footer Actions -->
+    <div class="p-6 border-t border-charcoal-800 bg-charcoal-900/60 flex items-center justify-end gap-4">
+      <button 
+        (click)="closeModal()"
+        class="border border-charcoal-800 text-charcoal-350 hover:border-gold-500 hover:text-gold-500 text-xs font-bold tracking-widest px-6 py-3 uppercase transition-all cursor-pointer"
+      >
+        CANCEL
+      </button>
+      <button 
+        (click)="onSubmit()"
+        class="bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest px-8 py-3.5 uppercase hover:bg-gold-600 transition-all hover-gold-glow cursor-pointer"
+      >
+        SAVE PRODUCT
+      </button>
+    </div>
+  </div>
+</div>

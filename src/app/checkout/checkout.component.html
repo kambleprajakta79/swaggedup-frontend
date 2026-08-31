@@ -1,0 +1,347 @@
+<div class="min-h-screen py-16 px-4 max-w-7xl mx-auto">
+  <!-- Title -->
+  <div class="text-center mb-12" *ngIf="currentStep < 5">
+    <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">Secure Checkout</span>
+    <h1 class="text-3xl md:text-5xl font-bold text-ivory tracking-wide uppercase font-display">CHECKOUT</h1>
+    <div class="w-12 h-[2px] bg-gold-500 mx-auto mt-2"></div>
+  </div>
+
+  <!-- Step indicators -->
+  <div class="max-w-3xl mx-auto mb-12 flex justify-between relative" *ngIf="currentStep < 5">
+    <!-- Connecting Line -->
+    <div class="absolute top-1/2 left-0 right-0 h-[1px] bg-charcoal-800 -translate-y-1/2 z-0"></div>
+    <div class="absolute top-1/2 left-0 h-[1px] bg-gold-500 -translate-y-1/2 z-0 transition-all duration-300"
+         [style.width.%]="(currentStep - 1) * 33.33"></div>
+
+    <!-- Step Chips -->
+    <div *ngFor="let step of [1, 2, 3, 4]" class="relative z-10 flex flex-col items-center">
+      <div 
+        [ngClass]="{
+          'bg-gold-500 text-charcoal-950 font-bold border-gold-500 scale-110 shadow-[0_0_10px_rgba(197,168,128,0.4)]': currentStep === step,
+          'bg-charcoal-900 text-gold-500 border-gold-500/50': currentStep > step,
+          'bg-charcoal-900 text-charcoal-500 border-charcoal-800': currentStep < step
+        }"
+        class="w-10 h-10 rounded-full border flex items-center justify-center text-xs transition-all duration-300"
+      >
+        <span *ngIf="currentStep <= step">{{ step }}</span>
+        <span *ngIf="currentStep > step">&#10003;</span>
+      </div>
+      <span 
+        [ngClass]="{
+          'text-gold-500 font-medium': currentStep === step,
+          'text-charcoal-350': currentStep > step,
+          'text-charcoal-550': currentStep < step
+        }"
+        class="text-[10px] uppercase tracking-widest mt-2 font-display hidden sm:block"
+      >
+        {{ step === 1 ? 'INFO' : step === 2 ? 'SHIPPING' : step === 3 ? 'REVIEW' : 'PAYMENT' }}
+      </span>
+    </div>
+  </div>
+
+  <!-- Main Checkout Grid -->
+  <div class="flex flex-col lg:flex-row gap-12 items-start">
+    
+    <!-- Step Forms Column -->
+    <div class="w-full lg:flex-grow" [formGroup]="checkoutForm">
+      
+      <!-- Success State (Fallback) -->
+      <div *ngIf="currentStep === 5" class="glass-panel p-8 md:p-12 text-center max-w-xl mx-auto animate-fade-in">
+        <div class="w-16 h-16 bg-gold-500/10 border border-gold-500 rounded-full flex items-center justify-center mx-auto mb-6">
+          <span class="text-gold-500 text-2xl font-bold">&#10003;</span>
+        </div>
+        <h2 class="text-xl md:text-3xl font-bold text-ivory tracking-wider uppercase mb-2">ORDER PLACED SUCCESSFULLY!</h2>
+        <p class="text-charcoal-300 font-light text-sm mb-6">
+          Thank you for shopping with Swaggedup. Your sartorial garments are prepared for processing.
+        </p>
+
+        <div class="bg-charcoal-900/50 border border-charcoal-850 p-6 mb-8 text-center">
+          <span class="text-charcoal-400 text-xs tracking-widest uppercase block mb-1">YOUR ORDER NUMBER</span>
+          <span class="text-gold-500 font-display text-lg md:text-xl font-bold tracking-wider">{{ placedOrderNumber }}</span>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-4 justify-center">
+          <button 
+            routerLink="/shop" 
+            class="bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest px-8 py-3.5 uppercase hover:bg-gold-600 transition-colors cursor-pointer"
+          >
+            CONTINUE SHOPPING
+          </button>
+        </div>
+      </div>
+
+      <!-- Step 1: Customer Information -->
+      <div *ngIf="currentStep === 1" class="glass-panel p-8 animate-fade-in">
+        <h2 class="text-lg font-bold text-ivory tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3">
+          1. CUSTOMER INFORMATION
+        </h2>
+        <div class="flex flex-col gap-6">
+          <!-- Name -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">FULL NAME *</label>
+            <input 
+              type="text" 
+              formControlName="customerName"
+              placeholder="e.g. Alexander McQueen" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('customerName')?.touched && checkoutForm.get('customerName')?.invalid" class="text-xs text-red-500 mt-1">
+              Full name is required.
+            </div>
+          </div>
+          
+          <!-- Email -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">EMAIL ADDRESS *</label>
+            <input 
+              type="email" 
+              formControlName="customerEmail"
+              placeholder="e.g. alex@example.com" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('customerEmail')?.touched && checkoutForm.get('customerEmail')?.invalid" class="text-xs text-red-500 mt-1">
+              Please enter a valid email address.
+            </div>
+          </div>
+
+          <!-- Phone -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PHONE NUMBER *</label>
+            <input 
+              type="tel" 
+              formControlName="customerPhone"
+              placeholder="e.g. +91 9876543210" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('customerPhone')?.touched && checkoutForm.get('customerPhone')?.invalid" class="text-xs text-red-500 mt-1">
+              Please enter a valid phone number (minimum 10 digits).
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 2: Shipping Address -->
+      <div *ngIf="currentStep === 2" class="glass-panel p-8 animate-fade-in">
+        <h2 class="text-lg font-bold text-ivory tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3">
+          2. SHIPPING ADDRESS
+        </h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <!-- Address Line 1 -->
+          <div class="col-span-2">
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">ADDRESS LINE 1 *</label>
+            <input 
+              type="text" 
+              formControlName="addressLine1"
+              placeholder="e.g. Flat/House No., Street Name" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('addressLine1')?.touched && checkoutForm.get('addressLine1')?.invalid" class="text-xs text-red-500 mt-1">
+              Address line 1 is required.
+            </div>
+          </div>
+
+          <!-- Address Line 2 -->
+          <div class="col-span-2">
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">ADDRESS LINE 2 (OPTIONAL)</label>
+            <input 
+              type="text" 
+              formControlName="addressLine2"
+              placeholder="e.g. Apartment, Suite, Landmark" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+          </div>
+
+          <!-- City -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">CITY *</label>
+            <input 
+              type="text" 
+              formControlName="city"
+              placeholder="e.g. Mumbai" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('city')?.touched && checkoutForm.get('city')?.invalid" class="text-xs text-red-500 mt-1">
+              City is required.
+            </div>
+          </div>
+
+          <!-- State -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">STATE *</label>
+            <input 
+              type="text" 
+              formControlName="state"
+              placeholder="e.g. Maharashtra" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('state')?.touched && checkoutForm.get('state')?.invalid" class="text-xs text-red-500 mt-1">
+              State is required.
+            </div>
+          </div>
+
+          <!-- Postal Code -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">POSTAL CODE *</label>
+            <input 
+              type="text" 
+              formControlName="postalCode"
+              placeholder="e.g. 400001" 
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('postalCode')?.touched && checkoutForm.get('postalCode')?.invalid" class="text-xs text-red-500 mt-1">
+              Postal code is required (minimum 5 characters).
+            </div>
+          </div>
+
+          <!-- Country -->
+          <div>
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">COUNTRY *</label>
+            <input 
+              type="text" 
+              formControlName="country"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
+            <div *ngIf="checkoutForm.get('country')?.touched && checkoutForm.get('country')?.invalid" class="text-xs text-red-500 mt-1">
+              Country is required.
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 3: Order Review -->
+      <div *ngIf="currentStep === 3" class="glass-panel p-8 animate-fade-in">
+        <h2 class="text-lg font-bold text-ivory tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3">
+          3. REVIEW ITEMS
+        </h2>
+        <div class="flex flex-col gap-6">
+          <div *ngFor="let item of cartItems" class="flex gap-4 border-b border-charcoal-850/50 pb-4 last:border-0 last:pb-0">
+            <div class="w-16 aspect-[3/4] bg-charcoal-950 border border-charcoal-850 flex-shrink-0 overflow-hidden">
+              <img [src]="item.product.images?.[0] || 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800'" [alt]="item.product.name" class="w-full h-full object-cover" />
+            </div>
+            <div class="flex-grow">
+              <h4 class="text-xs font-bold text-ivory font-display tracking-widest uppercase">{{ item.product.name }}</h4>
+              <p class="text-[10px] text-charcoal-400 mt-1">Size: <span class="text-gold-500 font-bold">{{ item.variant.size }}</span></p>
+              <p class="text-[10px] text-charcoal-400">Qty: <span class="text-ivory">{{ item.quantity }}</span></p>
+            </div>
+            <div class="text-xs font-bold text-gold-500 self-center">
+              {{ (item.variant.price * item.quantity) | currency:'INR':'symbol':'1.0-0' }}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Step 4: Payment -->
+      <div *ngIf="currentStep === 4" class="glass-panel p-8 animate-fade-in">
+        <h2 class="text-lg font-bold text-ivory tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3">
+          4. PAYMENT METHOD
+        </h2>
+        <div class="flex flex-col gap-4">
+          <!-- COD -->
+          <label 
+            [ngClass]="{'border-gold-500 bg-gold-500/5': checkoutForm.get('paymentMethod')?.value === 'COD'}"
+            class="flex items-center border border-charcoal-800 p-5 cursor-pointer hover:border-gold-500/50 transition-all"
+          >
+            <input 
+              type="radio" 
+              formControlName="paymentMethod" 
+              value="COD" 
+              class="mr-4 accent-gold-500"
+            />
+            <div>
+              <span class="text-sm font-bold text-ivory block uppercase tracking-wider">Cash On Delivery</span>
+              <span class="text-xs text-charcoal-400 font-light mt-1 block">Pay in cash when your bespoke garments are delivered to your door.</span>
+            </div>
+          </label>
+          
+          <!-- Mock Card -->
+          <label 
+            [ngClass]="{'border-gold-500 bg-gold-500/5': checkoutForm.get('paymentMethod')?.value === 'CARD'}"
+            class="flex items-center border border-charcoal-800 p-5 cursor-pointer hover:border-gold-500/50 transition-all"
+          >
+            <input 
+              type="radio" 
+              formControlName="paymentMethod" 
+              value="CARD" 
+              class="mr-4 accent-gold-500"
+            />
+            <div>
+              <span class="text-sm font-bold text-ivory block uppercase tracking-wider">Mock Card Payment</span>
+              <span class="text-xs text-charcoal-400 font-light mt-1 block">Simulate an instant card transaction. No real credit card required.</span>
+            </div>
+          </label>
+        </div>
+      </div>
+
+      <!-- Form Navigation Button Row -->
+      <div class="flex items-center justify-between mt-8" *ngIf="currentStep < 5">
+        <button 
+          (click)="prevStep()" 
+          [disabled]="currentStep === 1"
+          class="border border-charcoal-800 text-charcoal-355 hover:border-gold-500 hover:text-gold-500 disabled:opacity-0 disabled:cursor-default px-6 py-3.5 text-xs font-bold tracking-widest uppercase transition-all cursor-pointer"
+        >
+          BACK
+        </button>
+
+        <button 
+          *ngIf="currentStep < 4"
+          (click)="nextStep()"
+          class="bg-gold-500 text-charcoal-900 hover:bg-gold-600 px-8 py-3.5 text-xs font-bold tracking-widest uppercase transition-all cursor-pointer"
+        >
+          CONTINUE &rarr;
+        </button>
+
+        <button 
+          *ngIf="currentStep === 4"
+          (click)="submitOrder()"
+          [disabled]="submitting"
+          class="bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 disabled:cursor-not-allowed px-8 py-3.5 text-xs font-bold tracking-widest uppercase transition-all hover-gold-glow flex items-center gap-2 cursor-pointer"
+        >
+          <span *ngIf="submitting" class="w-3 h-3 border border-charcoal-900 border-t-transparent rounded-full animate-spin"></span>
+          {{ submitting ? 'PROCESSING...' : 'PLACE ORDER' }}
+        </button>
+      </div>
+
+    </div>
+
+    <!-- Order Summary Column (Sticky sidebar) -->
+    <div class="w-full lg:w-[360px] flex-shrink-0 sticky top-24" *ngIf="currentStep < 5">
+      <div class="glass-panel p-6">
+        <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3">
+          ORDER SUMMARY
+        </h3>
+        
+        <!-- Totals details -->
+        <div class="flex flex-col gap-3 text-xs tracking-wider uppercase mb-6">
+          <div class="flex justify-between">
+            <span class="text-charcoal-400 font-light">BAG SUBTOTAL</span>
+            <span class="text-ivory font-medium">{{ subtotal | currency:'INR':'symbol':'1.0-0' }}</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-charcoal-400 font-light">SHIPPING</span>
+            <span class="text-ivory font-medium" *ngIf="shipping > 0">{{ shipping | currency:'INR':'symbol':'1.0-0' }}</span>
+            <span class="text-green-500 font-bold tracking-widest" *ngIf="shipping === 0">FREE</span>
+          </div>
+          <div class="flex justify-between">
+            <span class="text-charcoal-400 font-light">ESTIMATED TAXES</span>
+            <span class="text-ivory font-medium">INCLUDED</span>
+          </div>
+        </div>
+
+        <hr class="border-charcoal-800 mb-6"/>
+
+        <div class="flex justify-between items-center mb-6">
+          <span class="text-xs font-bold text-ivory tracking-widest uppercase font-display">ESTIMATED TOTAL</span>
+          <span class="text-lg font-bold text-gold-500 font-display">
+            {{ total | currency:'INR':'symbol':'1.0-0' }}
+          </span>
+        </div>
+
+        <div class="border border-charcoal-850/60 p-4 bg-charcoal-950/20 text-[10px] text-charcoal-400 font-light leading-relaxed">
+          <span class="text-gold-500 font-bold block mb-1 font-display">RETURNS POLICY</span>
+          Complimentary collections and sizing returns are available on all bespoke orders within 14 days of delivery.
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>

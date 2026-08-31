@@ -1,0 +1,151 @@
+<div class="mb-10">
+  <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">Administration Overview</span>
+  <h1 class="text-3xl font-bold tracking-wide uppercase font-display">MANAGEMENT DASHBOARD</h1>
+</div>
+
+<!-- Loader -->
+<div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-10 animate-pulse">
+  <div *ngFor="let item of [1, 2, 3, 4]" class="bg-charcoal-900 h-32 border border-charcoal-800"></div>
+</div>
+
+<!-- Metrics Cards Grid -->
+<div *ngIf="!loading && stats" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
+  <!-- Total Revenue -->
+  <div class="glass-panel p-6">
+    <span class="text-charcoal-400 text-[10px] tracking-widest uppercase font-semibold block mb-2">TOTAL REVENUE (PAID)</span>
+    <div class="text-3xl font-bold text-gold-500 font-display">
+      {{ stats.totalRevenue | currency:'INR':'symbol':'1.0-0' }}
+    </div>
+    <span class="text-[10px] text-green-500 tracking-wide mt-1 block">Live balance in system</span>
+  </div>
+
+  <!-- Total Orders -->
+  <div class="glass-panel p-6">
+    <span class="text-charcoal-400 text-[10px] tracking-widest uppercase font-semibold block mb-2">TOTAL ORDERS</span>
+    <div class="text-3xl font-bold text-ivory font-display">
+      {{ stats.totalOrders }}
+    </div>
+    <span class="text-[10px] text-charcoal-450 tracking-wide mt-1 block">Includes all status pipelines</span>
+  </div>
+
+  <!-- Pending Orders -->
+  <div class="glass-panel p-6">
+    <span class="text-charcoal-400 text-[10px] tracking-widest uppercase font-semibold block mb-2">PENDING ORDERS</span>
+    <div class="text-3xl font-bold text-yellow-500 font-display">
+      {{ stats.pendingOrders }}
+    </div>
+    <span class="text-[10px] text-yellow-500/80 tracking-wide mt-1 block">Requires manual fulfillment</span>
+  </div>
+
+  <!-- Low Stock items -->
+  <div class="glass-panel p-6 border-red-500/10">
+    <span class="text-charcoal-400 text-[10px] tracking-widest uppercase font-semibold block mb-2">LOW STOCK ALERTS</span>
+    <div class="text-3xl font-bold text-red-500 font-display">
+      {{ stats.lowStockProducts }}
+    </div>
+    <span class="text-[10px] text-red-400/80 tracking-wide mt-1 block">Threshold: &le; 5 units left</span>
+  </div>
+</div>
+
+<!-- Data Tables Grid -->
+<div *ngIf="!loading && stats" class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+  
+  <!-- Recent Orders Table -->
+  <div class="glass-panel p-6 lg:col-span-2 flex flex-col">
+    <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3 flex justify-between items-center">
+      <span>RECENT ORDERS</span>
+      <a routerLink="/admin/orders" class="text-[10px] text-charcoal-400 hover:text-gold-500 font-normal">Manage Orders &rarr;</a>
+    </h3>
+
+    <!-- Empty state -->
+    <div *ngIf="stats.recentOrders?.length === 0" class="text-center py-10 text-charcoal-400 font-light text-sm">
+      No orders have been placed yet.
+    </div>
+
+    <!-- Table -->
+    <div class="overflow-x-auto" *ngIf="stats.recentOrders?.length > 0">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="text-[10px] text-charcoal-400 tracking-widest uppercase border-b border-charcoal-800">
+            <th class="py-3 px-2">Order #</th>
+            <th class="py-3 px-2">Customer</th>
+            <th class="py-3 px-2">Amount</th>
+            <th class="py-3 px-2">Payment</th>
+            <th class="py-3 px-2 text-right">Status</th>
+          </tr>
+        </thead>
+        <tbody class="text-xs font-light divide-y divide-charcoal-850/50">
+          <tr *ngFor="let order of stats.recentOrders" class="hover:bg-charcoal-900/20">
+            <td class="py-4 px-2 font-mono font-bold text-gold-500">{{ order.orderNumber }}</td>
+            <td class="py-4 px-2">{{ order.customerName }}</td>
+            <td class="py-4 px-2">{{ order.totalAmount | currency:'INR':'symbol':'1.0-0' }}</td>
+            <td class="py-4 px-2">
+              <span 
+                [ngClass]="{
+                  'text-green-500 font-bold bg-green-500/5 px-2 py-0.5 border border-green-500/20': order.paymentStatus === 'PAID',
+                  'text-yellow-500 bg-yellow-500/5 px-2 py-0.5 border border-yellow-500/20': order.paymentStatus === 'PENDING',
+                  'text-red-500 bg-red-500/5 px-2 py-0.5 border border-red-500/20': order.paymentStatus === 'FAILED'
+                }"
+                class="rounded text-[9px] uppercase tracking-wider"
+              >
+                {{ order.paymentStatus }}
+              </span>
+            </td>
+            <td class="py-4 px-2 text-right">
+              <span 
+                [ngClass]="{
+                  'text-yellow-500': order.status === 'PENDING',
+                  'text-blue-500': order.status === 'PROCESSING',
+                  'text-purple-500': order.status === 'SHIPPED',
+                  'text-green-500': order.status === 'DELIVERED',
+                  'text-red-500': order.status === 'CANCELLED'
+                }"
+                class="text-[10px] font-bold uppercase tracking-wider"
+              >
+                {{ order.status }}
+              </span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Low Stock Alerts Column -->
+  <div class="glass-panel p-6 flex flex-col">
+    <h3 class="text-sm font-bold text-gold-500 tracking-widest uppercase mb-6 font-display border-b border-charcoal-850 pb-3 flex justify-between items-center">
+      <span>LOW STOCK WARNING</span>
+      <a routerLink="/admin/inventory" class="text-[10px] text-charcoal-400 hover:text-gold-500 font-normal">Restock &rarr;</a>
+    </h3>
+
+    <!-- Empty state -->
+    <div *ngIf="stats.lowStockDetails?.length === 0" class="text-center py-10 text-green-500 font-light text-sm">
+      All products have healthy inventory levels.
+    </div>
+
+    <!-- Alerts -->
+    <div class="flex flex-col gap-4 overflow-y-auto max-h-[350px] pr-1" *ngIf="stats.lowStockDetails?.length > 0">
+      <div 
+        *ngFor="let item of stats.lowStockDetails" 
+        class="flex items-center justify-between border border-charcoal-800 p-3 bg-charcoal-900/10 hover:border-red-500/25 transition-all"
+      >
+        <div>
+          <span class="text-xs font-bold text-ivory block truncate max-w-[150px]">{{ item.product?.name }}</span>
+          <span class="text-[9px] text-charcoal-450 font-mono mt-1 block">SKU: {{ item.sku }} (SIZE: {{ item.size }})</span>
+        </div>
+        <div class="text-right">
+          <span 
+            [ngClass]="{
+              'text-red-500 bg-red-500/10 border-red-500/30': item.stock === 0,
+              'text-yellow-500 bg-yellow-500/10 border-yellow-500/30': item.stock > 0
+            }"
+            class="border px-2.5 py-1 rounded text-[9px] font-bold tracking-widest uppercase"
+          >
+            {{ item.stock === 0 ? 'OUT' : item.stock + ' LEFT' }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>

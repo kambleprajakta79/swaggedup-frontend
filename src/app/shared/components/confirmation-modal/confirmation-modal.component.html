@@ -1,0 +1,29 @@
+<div *ngIf="isOpen" class="fixed inset-0 z-[9999] flex items-center justify-center p-4">
+  <!-- Overlay Backdrop -->
+  <div class="absolute inset-0 bg-charcoal-950/80 backdrop-blur-sm" (click)="onCancel()"></div>
+
+  <!-- Modal Content Panel -->
+  <div class="relative w-full max-w-md border border-charcoal-800 bg-charcoal-900 p-8 shadow-2xl animate-fade-in">
+    <h3 class="text-lg font-display tracking-widest text-ivory uppercase font-bold mb-3">
+      {{ title }}
+    </h3>
+    <p class="text-xs text-charcoal-400 font-light leading-relaxed mb-6">
+      {{ message }}
+    </p>
+
+    <div class="flex items-center justify-end gap-4">
+      <button 
+        (click)="onCancel()"
+        class="text-charcoal-400 hover:text-ivory text-[10px] font-bold tracking-widest uppercase py-2 px-4 transition-colors cursor-pointer"
+      >
+        {{ cancelText }}
+      </button>
+      <button 
+        (click)="onConfirm()"
+        class="bg-gold-500 text-charcoal-900 hover:bg-gold-600 text-[10px] font-bold tracking-widest uppercase py-3 px-6 transition-colors cursor-pointer"
+      >
+        {{ confirmText }}
+      </button>
+    </div>
+  </div>
+</div>

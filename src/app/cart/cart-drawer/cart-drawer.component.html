@@ -1,0 +1,128 @@
+<!-- Backdrop overlay -->
+<div 
+  *ngIf="isOpen" 
+  (click)="close()"
+  class="fixed inset-0 bg-black/60 backdrop-blur-sm z-[9998] transition-opacity duration-300 animate-fade-in"
+></div>
+
+<!-- Cart Panel Drawer -->
+<div 
+  [ngClass]="{
+    'translate-x-0': isOpen,
+    'translate-x-full': !isOpen
+  }"
+  class="fixed right-0 top-0 h-full w-full max-w-md bg-charcoal-900 border-l border-charcoal-800 z-[9999] shadow-2xl transition-transform duration-500 ease-out flex flex-col"
+>
+  <!-- Drawer Header -->
+  <div class="flex items-center justify-between p-6 border-b border-charcoal-800">
+    <h3 class="text-sm font-bold text-ivory tracking-widest uppercase font-display">
+      SHOPPING CART ({{ cartService.getItemCount() }})
+    </h3>
+    <button 
+      (click)="close()"
+      class="text-charcoal-400 hover:text-gold-500 transition-colors text-2xl font-light cursor-pointer"
+    >
+      &times;
+    </button>
+  </div>
+
+  <!-- Cart Content -->
+  <div class="flex-grow overflow-y-auto p-6 flex flex-col gap-6">
+    <!-- Empty Cart State -->
+    <div *ngIf="items.length === 0" class="flex flex-col items-center justify-center flex-grow py-20 text-center">
+      <span class="text-charcoal-500 text-5xl mb-4 font-light">&empty;</span>
+      <h4 class="text-sm font-bold text-ivory tracking-wider uppercase mb-2">YOUR BAG IS EMPTY</h4>
+      <p class="text-charcoal-450 text-xs font-light max-w-xs mb-6">
+        Signify your presence with our curated collection of premium menswear pieces.
+      </p>
+      <button 
+        (click)="close()" 
+        routerLink="/shop"
+        class="bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest px-8 py-3.5 uppercase hover:bg-gold-600 transition-colors cursor-pointer"
+      >
+        SHOP THE ATELIER
+      </button>
+    </div>
+
+    <!-- Cart Items List -->
+    <div *ngIf="items.length > 0" class="flex flex-col gap-6">
+      <div 
+        *ngFor="let item of items" 
+        class="flex gap-4 border-b border-charcoal-850/50 pb-6 last:border-b-0"
+      >
+        <!-- Item image -->
+        <div class="w-20 aspect-[3/4] overflow-hidden border border-charcoal-800 bg-charcoal-950 flex-shrink-0">
+          <img 
+            [src]="item.product.images?.[0] || 'https://images.unsplash.com/photo-1544022613-e87ca75a784a?q=80&w=800'" 
+            [alt]="item.product.name"
+            class="w-full h-full object-cover"
+          />
+        </div>
+
+        <!-- Item Info -->
+        <div class="flex-grow flex flex-col justify-between">
+          <div>
+            <h4 class="text-xs font-bold text-ivory tracking-wider uppercase font-display mb-1 truncate max-w-[200px]">
+              {{ item.product.name }}
+            </h4>
+            <div class="text-[10px] text-charcoal-400 tracking-widest uppercase mb-1">
+              Size: <span class="text-gold-500 font-bold">{{ item.variant.size }}</span>
+            </div>
+            <div class="text-xs font-medium text-gold-500">
+              {{ item.variant.price | currency:'INR':'symbol':'1.0-0' }}
+            </div>
+          </div>
+
+          <!-- Quantity selector row -->
+          <div class="flex items-center border border-charcoal-800 justify-between w-24 bg-charcoal-950 px-1 py-0.5">
+            <button 
+              (click)="updateQty(item, -1)" 
+              [disabled]="item.quantity <= 1"
+              class="px-2 py-1 text-charcoal-400 hover:text-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-xs cursor-pointer"
+            >
+              &minus;
+            </button>
+            <span class="text-xs font-bold text-ivory">{{ item.quantity }}</span>
+            <button 
+              (click)="updateQty(item, 1)" 
+              [disabled]="item.quantity >= item.variant.stock"
+              class="px-2 py-1 text-charcoal-400 hover:text-ivory disabled:opacity-30 disabled:cursor-not-allowed transition-colors text-xs cursor-pointer"
+            >
+              &plus;
+            </button>
+          </div>
+        </div>
+
+        <!-- Remove button -->
+        <div class="flex-shrink-0 self-start">
+          <button 
+            (click)="remove(item)" 
+            class="text-charcoal-450 hover:text-red-500 transition-colors text-lg cursor-pointer"
+          >
+            &times;
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer Footer (Sticky at bottom) -->
+  <div *ngIf="items.length > 0" class="p-6 border-t border-charcoal-800 bg-charcoal-900/60">
+    <div class="flex justify-between items-center mb-4">
+      <span class="text-xs font-medium text-charcoal-350 tracking-widest uppercase">SUBTOTAL</span>
+      <span class="text-base font-bold text-gold-500">
+        {{ subtotal | currency:'INR':'symbol':'1.0-0' }}
+      </span>
+    </div>
+    <p class="text-[10px] text-charcoal-450 font-light mb-6 tracking-wide leading-relaxed">
+      Taxes and shipping calculated at checkout. Free shipping available on orders above ₹5,000.
+    </p>
+    
+    <button 
+      (click)="checkout()"
+      class="w-full bg-gold-500 text-charcoal-900 text-xs font-bold tracking-widest py-4 uppercase hover:bg-gold-600 transition-colors hover-gold-glow cursor-pointer"
+    >
+      PROCEED TO CHECKOUT
+    </button>
+  </div>
+</div>
