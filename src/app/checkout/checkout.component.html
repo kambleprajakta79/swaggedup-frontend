@@ -1,4 +1,24 @@
 <div class="min-h-screen py-16 px-4 max-w-7xl mx-auto">
+  <!-- Sign-in prompt for guests -->
+  <div *ngIf="!isLoggedIn && currentStep === 1" class="max-w-3xl mx-auto mb-8 glass-panel px-6 py-4 flex flex-wrap items-center justify-between gap-3">
+    <p class="text-xs text-charcoal-400 font-light">
+      Have an account? <span class="text-ivory">Sign in</span> for faster checkout and order history.
+    </p>
+    <div class="flex gap-3">
+      <a [routerLink]="['/login']" [queryParams]="{ returnUrl: '/checkout' }" class="text-[10px] uppercase tracking-widest text-gold-500 hover:text-gold-600 border border-gold-500/40 px-4 py-2 transition-colors">
+        Sign in
+      </a>
+      <a routerLink="/register" class="text-[10px] uppercase tracking-widest text-charcoal-450 hover:text-ivory border border-charcoal-800 px-4 py-2 transition-colors">
+        Create account
+      </a>
+    </div>
+  </div>
+
+  <!-- Logged-in notice -->
+  <div *ngIf="isLoggedIn && currentStep === 1" class="max-w-3xl mx-auto mb-8 text-center">
+    <p class="text-[10px] uppercase tracking-widest text-green-500/80">✓ Signed in — this order will be saved to your account</p>
+  </div>
+
   <!-- Title -->
   <div class="text-center mb-12" *ngIf="currentStep < 5">
     <span class="text-gold-500 uppercase tracking-[0.3em] text-xs font-semibold block mb-1">Secure Checkout</span>
@@ -253,20 +273,20 @@
             </div>
           </label>
           
-          <!-- Mock Card -->
+          <!-- Online (Razorpay: UPI / Cards / Netbanking) -->
           <label 
-            [ngClass]="{'border-gold-500 bg-gold-500/5': checkoutForm.get('paymentMethod')?.value === 'CARD'}"
+            [ngClass]="{'border-gold-500 bg-gold-500/5': checkoutForm.get('paymentMethod')?.value === 'ONLINE'}"
             class="flex items-center border border-charcoal-800 p-5 cursor-pointer hover:border-gold-500/50 transition-all"
           >
             <input 
               type="radio" 
               formControlName="paymentMethod" 
-              value="CARD" 
+              value="ONLINE" 
               class="mr-4 accent-gold-500"
             />
             <div>
-              <span class="text-sm font-bold text-ivory block uppercase tracking-wider">Mock Card Payment</span>
-              <span class="text-xs text-charcoal-400 font-light mt-1 block">Simulate an instant card transaction. No real credit card required.</span>
+              <span class="text-sm font-bold text-ivory block uppercase tracking-wider">Pay Online (UPI / Card / Netbanking)</span>
+              <span class="text-xs text-charcoal-400 font-light mt-1 block">Secure payment via Razorpay. UPI, credit/debit cards, and netbanking supported.</span>
             </div>
           </label>
         </div>

@@ -20,7 +20,11 @@ export class OrderService {
       map(res => res.orders[0])
     );
   }
-
+  getMyOrders(): Observable<Order[]> {
+    return this.api.get<{ orders: Order[] }>('/orders/mine').pipe(
+      map((res) => res.orders)
+    );
+  }
   // Admin Actions
   getDashboardStats(): Observable<any> {
     return this.api.get<any>('/admin/orders/dashboard/stats');

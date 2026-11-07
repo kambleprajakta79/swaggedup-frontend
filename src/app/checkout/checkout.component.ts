@@ -5,6 +5,8 @@ import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angula
 import { CartService } from '../core/services/cart.service';
 import { OrderService } from '../core/services/order.service';
 import { ToastService } from '../core/services/toast.service';
+import { AuthService } from '../core/services/auth.service';
+import { PaymentService } from '../core/services/payment.service';
 import { CartItem } from '../core/models/cart.model';
 
 @Component({
@@ -19,12 +21,15 @@ export class CheckoutComponent implements OnInit {
   private cartService = inject(CartService);
   private orderService = inject(OrderService);
   private toastService = inject(ToastService);
+  private authService = inject(AuthService);
+  private paymentService = inject(PaymentService);
 
   checkoutForm!: FormGroup;
   cartItems: CartItem[] = [];
   subtotal = 0;
   shipping = 0;
   total = 0;
+  isLoggedIn = false;
   
   currentStep = 1;
   orderPlaced = false;
@@ -41,6 +46,18 @@ export class CheckoutComponent implements OnInit {
     });
 
     this.initForm();
+
+    // Prefill details for logged-in customers
+    this.authService.user$.subscribe((user) => {
+      this.isLoggedIn = !!user;
+      if (user) {
+        this.checkoutForm.patchValue({
+          customerName: this.checkoutForm.get('customerName')?.value || user.name || '',
+          customerEmail: this.checkoutForm.get('customerEmail')?.value || user.email,
+          customerPhone: this.checkoutForm.get('customerPhone')?.value || user.phone || '',
+        });
+      }
+    });
   }
 
   private initForm() {
@@ -151,8 +168,26 @@ export class CheckoutComponent implements OnInit {
     };
 
     this.orderService.createOrder(orderPayload).subscribe({
-      next: (res: any) => {
+      next: async (res: any) => {
         this.placedOrderNumber = res.orderNumber;
+
+        // Online payment: run Razorpay flow before confirming
+        if (formVal.paymentMethod === 'ONLINE') {
+          const paid = await this.paymentService.payOnline(res.id, {
+            name: formVal.customerName,
+            email: formVal.customerEmail,
+            phone: formVal.customerPhone,
+          });
+          if (!paid) {
+            // Order stays PENDING with paymentStatus PENDING — customer can retry from tracking page
+            this.toastService.info('Order saved but payment incomplete. You can retry payment from the order page.');
+            this.cartService.clearCart();
+            this.submitting = false;
+            this.router.navigate(['/order', this.placedOrderNumber]);
+            return;
+          }
+        }
+
         this.orderPlaced = true;
         this.cartService.clearCart();
         this.toastService.success('Order placed successfully!');

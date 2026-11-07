@@ -16,6 +16,8 @@ export interface Product {
   isFeatured: boolean;
   isNewArrival: boolean;
   isActive: boolean;
+  isCustomizable?: boolean;
+  customizationNote?: string | null;
   variants: ProductVariant[];
   createdAt: Date | string;
   updatedAt: Date | string;

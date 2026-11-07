@@ -1,0 +1,106 @@
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md glass-panel p-8 md:p-10 animate-fade-in">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <span class="text-gold-500 uppercase tracking-[0.4em] text-xs font-semibold block mb-2">SWAGGEDUP</span>
+      <h2 class="text-2xl font-bold text-ivory tracking-wider uppercase font-display">
+        {{ step === 'details' ? 'CREATE ACCOUNT' : 'VERIFY EMAIL' }}
+      </h2>
+      <div class="w-12 h-[1px] bg-gold-500 mx-auto mt-3"></div>
+    </div>
+
+    <!-- Step 1: details -->
+    <form *ngIf="step === 'details'" [formGroup]="detailsForm" (ngSubmit)="onRegister()" class="flex flex-col gap-5">
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">FULL NAME *</label>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Rahul Sharma"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">EMAIL *</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="you@example.com"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PHONE (OPTIONAL)</label>
+        <input
+          type="tel"
+          formControlName="phone"
+          placeholder="9876543210"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PASSWORD *</label>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="Minimum 6 characters"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="submitting"
+        class="w-full bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 font-display text-xs font-bold tracking-widest py-4 uppercase transition-all hover-gold-glow mt-2 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span *ngIf="submitting" class="w-3.5 h-3.5 border-2 border-charcoal-900 border-t-transparent rounded-full animate-spin"></span>
+        {{ submitting ? 'SENDING CODE...' : 'CONTINUE' }}
+      </button>
+
+      <p class="text-center text-[10px] text-charcoal-450 tracking-widest uppercase">
+        Already have an account? <a routerLink="/login" class="text-gold-500 hover:text-gold-600">Sign in</a>
+      </p>
+    </form>
+
+    <!-- Step 2: OTP -->
+    <form *ngIf="step === 'otp'" [formGroup]="otpForm" (ngSubmit)="onVerify()" class="flex flex-col gap-6">
+      <p class="text-xs text-charcoal-400 font-light leading-relaxed text-center">
+        We sent a 6-digit verification code to<br />
+        <span class="text-ivory">{{ registeredEmail }}</span>
+      </p>
+
+      <input
+        type="text"
+        formControlName="code"
+        maxlength="6"
+        placeholder="••••••"
+        class="w-full bg-charcoal-900 border border-charcoal-800 text-center text-2xl tracking-[0.6em] text-ivory px-4 py-4 focus:outline-none focus:border-gold-500 transition-all font-light"
+      />
+
+      <button
+        type="submit"
+        [disabled]="submitting"
+        class="w-full bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 font-display text-xs font-bold tracking-widest py-4 uppercase transition-all hover-gold-glow flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span *ngIf="submitting" class="w-3.5 h-3.5 border-2 border-charcoal-900 border-t-transparent rounded-full animate-spin"></span>
+        {{ submitting ? 'VERIFYING...' : 'VERIFY & SIGN IN' }}
+      </button>
+
+      <button
+        type="button"
+        (click)="onResend()"
+        [disabled]="submitting"
+        class="text-center text-[10px] text-charcoal-450 hover:text-gold-500 tracking-widest uppercase transition-colors cursor-pointer"
+      >
+        Didn't get the code? Resend
+      </button>
+    </form>
+
+    <a routerLink="/" class="block text-center text-[10px] text-charcoal-450 hover:text-gold-500 tracking-widest uppercase transition-colors mt-6">
+      &larr; Continue shopping
+    </a>
+  </div>
+</div>

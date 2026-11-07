@@ -29,6 +29,18 @@ export class ProductDetailComponent implements OnInit {
   relatedProducts: Product[] = [];
   loading = true;
 
+  /** WhatsApp business number for click-to-chat (country code, no +). */
+  private readonly whatsappNumber = '919876543210'; // TODO: move to environment config
+
+  /** wa.me deep link with a prefilled customization inquiry for this product. */
+  get whatsappCustomizeLink(): string {
+    const name = this.product?.name || 'this product';
+    const text = encodeURIComponent(
+      `Hi SwaggedUp! I'm interested in a custom print on "${name}". Can you help me design it?`
+    );
+    return `https://wa.me/${this.whatsappNumber}?text=${text}`;
+  }
+
   ngOnInit() {
     // Subscribe to route parameter changes to reload when clicking related products
     this.route.paramMap.subscribe((params) => {

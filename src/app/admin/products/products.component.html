@@ -318,6 +318,21 @@
               <input type="checkbox" formControlName="isActive" class="mr-3 accent-gold-500" />
               PRODUCT VISIBILITY ACTIVE
             </label>
+            <label class="flex items-center text-xs tracking-wider uppercase font-medium cursor-pointer text-charcoal-300 hover:text-gold-500 transition-all">
+              <input type="checkbox" formControlName="isCustomizable" class="mr-3 accent-gold-500" />
+              CUSTOM PRINT AVAILABLE
+            </label>
+          </div>
+
+          <!-- Customization note (visible when isCustomizable is checked) -->
+          <div class="col-span-2 mt-4" *ngIf="productForm.get('isCustomizable')?.value">
+            <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">CUSTOMIZATION NOTE (SHOWN ON PRODUCT PAGE)</label>
+            <input
+              type="text"
+              formControlName="customizationNote"
+              placeholder="e.g. Custom prints available on request — contact us to design yours"
+              class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+            />
           </div>
         </div>
       </div>

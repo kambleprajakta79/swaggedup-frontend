@@ -1,0 +1,87 @@
+<div class="min-h-[80vh] flex items-center justify-center px-4 py-16">
+  <div class="w-full max-w-md glass-panel p-8 md:p-10 animate-fade-in">
+    <!-- Header -->
+    <div class="text-center mb-8">
+      <span class="text-gold-500 uppercase tracking-[0.4em] text-xs font-semibold block mb-2">SWAGGEDUP</span>
+      <h2 class="text-2xl font-bold text-ivory tracking-wider uppercase font-display">
+        {{ mode === 'login' ? 'SIGN IN' : 'RESET PASSWORD' }}
+      </h2>
+      <div class="w-12 h-[1px] bg-gold-500 mx-auto mt-3"></div>
+    </div>
+
+    <!-- Login form -->
+    <form *ngIf="mode === 'login'" [formGroup]="loginForm" (ngSubmit)="onLogin()" class="flex flex-col gap-6">
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">EMAIL *</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="you@example.com"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+        <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-xs text-red-500 mt-1">
+          A valid email address is required.
+        </div>
+      </div>
+
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PASSWORD *</label>
+        <input
+          type="password"
+          formControlName="password"
+          placeholder="••••••••"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+        <div *ngIf="loginForm.get('password')?.touched && loginForm.get('password')?.invalid" class="text-xs text-red-500 mt-1">
+          Password is required (minimum 6 characters).
+        </div>
+      </div>
+
+      <button
+        type="submit"
+        [disabled]="submitting"
+        class="w-full bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 font-display text-xs font-bold tracking-widest py-4 uppercase transition-all hover-gold-glow mt-2 flex items-center justify-center gap-2 cursor-pointer"
+      >
+        <span *ngIf="submitting" class="w-3.5 h-3.5 border-2 border-charcoal-900 border-t-transparent rounded-full animate-spin"></span>
+        {{ submitting ? 'SIGNING IN...' : 'SIGN IN' }}
+      </button>
+
+      <div class="flex items-center justify-between text-[10px] uppercase tracking-widest">
+        <button type="button" (click)="mode = 'forgot'" class="text-charcoal-450 hover:text-gold-500 transition-colors cursor-pointer">
+          Forgot password?
+        </button>
+        <a routerLink="/register" class="text-gold-500 hover:text-gold-600 transition-colors">Create account</a>
+      </div>
+    </form>
+
+    <!-- Forgot password form -->
+    <form *ngIf="mode === 'forgot'" [formGroup]="forgotForm" (ngSubmit)="onForgot()" class="flex flex-col gap-6">
+      <p class="text-xs text-charcoal-400 font-light leading-relaxed">
+        Enter your account email and we'll send you a 6-digit reset code.
+      </p>
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">EMAIL *</label>
+        <input
+          type="email"
+          formControlName="email"
+          placeholder="you@example.com"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+      <button
+        type="submit"
+        [disabled]="submitting"
+        class="w-full bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 font-display text-xs font-bold tracking-widest py-4 uppercase transition-all hover-gold-glow cursor-pointer"
+      >
+        {{ submitting ? 'SENDING...' : 'SEND RESET CODE' }}
+      </button>
+      <button type="button" (click)="mode = 'login'" class="text-center text-[10px] text-charcoal-450 hover:text-gold-500 tracking-widest uppercase transition-colors cursor-pointer">
+        &larr; Back to sign in
+      </button>
+    </form>
+
+    <a routerLink="/" class="block text-center text-[10px] text-charcoal-450 hover:text-gold-500 tracking-widest uppercase transition-colors mt-6">
+      &larr; Continue shopping
+    </a>
+  </div>
+</div>

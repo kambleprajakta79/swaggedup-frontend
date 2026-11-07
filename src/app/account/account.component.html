@@ -1,0 +1,165 @@
+<div class="min-h-[80vh] px-4 py-12 max-w-5xl mx-auto animate-fade-in">
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-8">
+    <div>
+      <span class="text-gold-500 uppercase tracking-[0.4em] text-xs font-semibold block mb-1">MY ACCOUNT</span>
+      <h1 class="text-3xl font-bold text-ivory tracking-wider uppercase font-display">
+        {{ user?.name || user?.email || 'Account' }}
+      </h1>
+    </div>
+    <button
+      (click)="logout()"
+      class="text-[10px] text-charcoal-450 hover:text-red-400 tracking-widest uppercase transition-colors border border-charcoal-800 px-4 py-2 cursor-pointer"
+    >
+      Sign out
+    </button>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-6 border-b border-charcoal-800 mb-8">
+    <button
+      (click)="setTab('profile')"
+      class="pb-3 text-xs uppercase tracking-widest transition-colors cursor-pointer"
+      [class.text-gold-500]="tab === 'profile'"
+      [class.border-b-2]="tab === 'profile'"
+      [class.border-gold-500]="tab === 'profile'"
+      [class.text-charcoal-450]="tab !== 'profile'"
+    >
+      Profile
+    </button>
+    <button
+      (click)="setTab('orders')"
+      class="pb-3 text-xs uppercase tracking-widest transition-colors cursor-pointer"
+      [class.text-gold-500]="tab === 'orders'"
+      [class.border-b-2]="tab === 'orders'"
+      [class.border-gold-500]="tab === 'orders'"
+      [class.text-charcoal-450]="tab !== 'orders'"
+    >
+      Order History
+    </button>
+    <button
+      (click)="setTab('wishlist')"
+      class="pb-3 text-xs uppercase tracking-widest transition-colors cursor-pointer"
+      [class.text-gold-500]="tab === 'wishlist'"
+      [class.border-b-2]="tab === 'wishlist'"
+      [class.border-gold-500]="tab === 'wishlist'"
+      [class.text-charcoal-450]="tab !== 'wishlist'"
+    >
+      Wishlist
+    </button>
+  </div>
+
+  <!-- Profile tab -->
+  <div *ngIf="tab === 'profile'" class="glass-panel p-8 max-w-xl">
+    <h3 class="text-sm uppercase tracking-widest text-ivory mb-6">Profile details</h3>
+    <form [formGroup]="profileForm" (ngSubmit)="saveProfile()" class="flex flex-col gap-5">
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">EMAIL</label>
+        <input
+          [value]="user?.email"
+          disabled
+          class="w-full bg-charcoal-900/50 border border-charcoal-800 text-sm text-charcoal-450 px-4 py-3 font-light"
+        />
+      </div>
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">FULL NAME</label>
+        <input
+          type="text"
+          formControlName="name"
+          placeholder="Your name"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">PHONE</label>
+        <input
+          type="tel"
+          formControlName="phone"
+          placeholder="9876543210"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
+        />
+      </div>
+      <button
+        type="submit"
+        [disabled]="savingProfile"
+        class="self-start bg-gold-500 text-charcoal-900 hover:bg-gold-600 disabled:opacity-55 font-display text-xs font-bold tracking-widest px-8 py-3 uppercase transition-all cursor-pointer"
+      >
+        {{ savingProfile ? 'SAVING...' : 'SAVE' }}
+      </button>
+    </form>
+  </div>
+
+  <!-- Orders tab -->
+  <div *ngIf="tab === 'orders'">
+    <div *ngIf="loadingOrders" class="text-center text-charcoal-450 py-12 text-sm uppercase tracking-widest">Loading orders...</div>
+
+    <div *ngIf="!loadingOrders && orders.length === 0" class="text-center py-16">
+      <p class="text-charcoal-450 text-sm mb-6">You haven't placed any orders yet.</p>
+      <a routerLink="/shop" class="text-gold-500 hover:text-gold-600 text-xs uppercase tracking-widest border border-gold-500/40 px-6 py-3 inline-block">
+        Start shopping
+      </a>
+    </div>
+
+    <div *ngFor="let order of orders" class="glass-panel p-6 mb-4 flex flex-wrap items-center justify-between gap-4">
+      <div>
+        <span class="text-ivory font-display text-sm tracking-wider">{{ order.orderNumber }}</span>
+        <span class="text-charcoal-450 text-xs ml-3">{{ order.createdAt | date: 'mediumDate' }}</span>
+        <div class="text-xs text-charcoal-400 mt-1">{{ order.items ? order.items.length : 0 }} item(s)</div>
+      </div>
+      <div class="flex items-center gap-6">
+        <span
+          class="text-[10px] uppercase tracking-widest px-3 py-1 border"
+          [class.border-gold-500]="order.status === 'PENDING' || order.status === 'PROCESSING'"
+          [class.text-gold-500]="order.status === 'PENDING' || order.status === 'PROCESSING'"
+          [class.border-green-500]="order.status === 'DELIVERED'"
+          [class.text-green-500]="order.status === 'DELIVERED'"
+          [class.border-red-500]="order.status === 'CANCELLED'"
+          [class.text-red-500]="order.status === 'CANCELLED'"
+        >
+          {{ order.status }}
+        </span>
+        <span class="text-ivory font-bold">₹{{ order.totalAmount }}</span>
+        <a [routerLink]="['/order', order.orderNumber]" class="text-gold-500 hover:text-gold-600 text-[10px] uppercase tracking-widest cursor-pointer">
+          Track →
+        </a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Wishlist tab -->
+  <div *ngIf="tab === 'wishlist'">
+    <div *ngIf="loadingWishlist" class="text-center text-charcoal-450 py-12 text-sm uppercase tracking-widest">Loading wishlist...</div>
+
+    <div *ngIf="!loadingWishlist && wishlist.length === 0" class="text-center py-16">
+      <p class="text-charcoal-450 text-sm mb-6">Your wishlist is empty.</p>
+      <a routerLink="/shop" class="text-gold-500 hover:text-gold-600 text-xs uppercase tracking-widest border border-gold-500/40 px-6 py-3 inline-block">
+        Discover products
+      </a>
+    </div>
+
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div *ngFor="let product of wishlist" class="glass-panel overflow-hidden group">
+        <a [routerLink]="['/product', product.slug]" class="block">
+          <div class="aspect-[3/4] bg-charcoal-900 overflow-hidden">
+            <img
+              *ngIf="product.images && product.images.length > 0"
+              [src]="product.images[0]"
+              [alt]="product.name"
+              class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+            />
+          </div>
+          <div class="p-3">
+            <h4 class="text-xs text-ivory font-medium truncate">{{ product.name }}</h4>
+            <p class="text-xs text-gold-500 mt-1">₹{{ product.basePrice }}</p>
+          </div>
+        </a>
+        <button
+          (click)="removeFromWishlist(product.id)"
+          class="w-full text-[10px] text-charcoal-450 hover:text-red-400 uppercase tracking-widest py-2 border-t border-charcoal-800 transition-colors cursor-pointer"
+        >
+          Remove
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

@@ -86,7 +86,9 @@ export class AdminProductsComponent implements OnInit {
       color: [''],
       isFeatured: [false],
       isNewArrival: [false],
-      isActive: [true]
+      isActive: [true],
+      isCustomizable: [false],
+      customizationNote: ['']
     });
   }
 
@@ -99,7 +101,9 @@ export class AdminProductsComponent implements OnInit {
       basePrice: 0,
       isActive: true,
       isFeatured: false,
-      isNewArrival: false
+      isNewArrival: false,
+      isCustomizable: false,
+      customizationNote: ''
     });
     this.clearNewVariantInputs();
     this.showModal = true;
@@ -126,7 +130,9 @@ export class AdminProductsComponent implements OnInit {
       color: product.color,
       isFeatured: !!product.isFeatured,
       isNewArrival: !!product.isNewArrival,
-      isActive: !!product.isActive
+      isActive: !!product.isActive,
+      isCustomizable: !!product.isCustomizable,
+      customizationNote: product.customizationNote || ''
     });
     this.clearNewVariantInputs();
     this.showModal = true;
@@ -278,6 +284,8 @@ export class AdminProductsComponent implements OnInit {
       isFeatured: !!formVal.isFeatured,
       isNewArrival: !!formVal.isNewArrival,
       isActive: !!formVal.isActive,
+      isCustomizable: !!formVal.isCustomizable,
+      customizationNote: formVal.isCustomizable ? (formVal.customizationNote || '') : null,
       variants: this.variants as any
     };
 

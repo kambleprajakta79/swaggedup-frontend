@@ -16,7 +16,6 @@
           type="email" 
           formControlName="email"
           placeholder="admin@swaggedup.com" 
-          value="admin@swaggedup.com"
           class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all font-light"
         />
         <div *ngIf="loginForm.get('email')?.touched && loginForm.get('email')?.invalid" class="text-xs text-red-500 mt-1">

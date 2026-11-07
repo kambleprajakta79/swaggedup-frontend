@@ -17,21 +17,42 @@
       SWAGGEDUP
     </a>
 
-    <!-- Right Cart Trigger -->
-    <button 
-      (click)="cartService.toggleCart()" 
-      class="relative flex items-center text-ivory hover:text-gold-500 transition-colors cursor-pointer p-1"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
-        <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
-      </svg>
-      <div 
-        *ngIf="cartService.getItemCount() > 0" 
-        class="absolute -top-1 -right-1 bg-gold-500 text-charcoal-900 font-bold text-[8px] w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-sm animate-fade-in"
+    <!-- Right: Profile + Cart Trigger -->
+    <div class="flex items-center gap-4">
+      <!-- Profile (guest → login icon; logged in → initials avatar) -->
+      <a 
+        *ngIf="!isLoggedIn"
+        routerLink="/login" 
+        class="flex items-center text-charcoal-300 hover:text-gold-500 transition-colors cursor-pointer p-1"
       >
-        {{ cartService.getItemCount() }}
-      </div>
-    </button>
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+        </svg>
+      </a>
+      <a
+        *ngIf="isLoggedIn"
+        routerLink="/account"
+        class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold border border-charcoal-600 text-charcoal-300 hover:border-gold-500 hover:text-gold-500 transition-colors cursor-pointer"
+      >
+        {{ initials }}
+      </a>
+
+      <!-- Cart Trigger -->
+      <button 
+        (click)="cartService.toggleCart()" 
+        class="relative flex items-center text-ivory hover:text-gold-500 transition-colors cursor-pointer p-1"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-6 h-6">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 10.5V6a3.75 3.75 0 1 0-7.5 0v4.5m11.356-1.993 1.263 12c.07.665-.45 1.243-1.119 1.243H4.25a1.125 1.125 0 0 1-1.12-1.243l1.264-12A1.125 1.125 0 0 1 5.513 7.5h12.974c.576 0 1.059.435 1.119 1.007ZM8.625 10.5a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Zm7.5 0a.375.375 0 1 1-.75 0 .375.375 0 0 1 .75 0Z" />
+        </svg>
+        <div 
+          *ngIf="cartService.getItemCount() > 0" 
+          class="absolute -top-1 -right-1 bg-gold-500 text-charcoal-900 font-bold text-[8px] w-4.5 h-4.5 rounded-full flex items-center justify-center border border-white shadow-sm animate-fade-in"
+        >
+          {{ cartService.getItemCount() }}
+        </div>
+      </button>
+    </div>
   </div>
 
   <!-- Desktop Navbar Layout (Hidden on Mobile) -->
@@ -69,12 +90,82 @@
         </button>
       </div>
 
-      <!-- Account (Admin portal / login) -->
-      <a routerLink="/admin/login" title="Staff Login" class="text-charcoal-300 hover:text-gold-500 transition-colors flex items-center gap-1.5 cursor-pointer">
-        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
-          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
-        </svg>
-      </a>
+      <!-- Profile (Myntra-style: login/signup for guests, account menu for users) -->
+      <div class="relative" (click)="$event.stopPropagation()">
+        <!-- Guest: Login / Signup button -->
+        <a
+          *ngIf="!isLoggedIn"
+          routerLink="/login"
+          class="flex flex-col items-center gap-0.5 text-charcoal-300 hover:text-gold-500 transition-colors cursor-pointer"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" />
+          </svg>
+          <span class="text-[9px] tracking-widest uppercase font-semibold">Login / Signup</span>
+        </a>
+
+        <!-- Logged in: avatar + dropdown -->
+        <div *ngIf="isLoggedIn" class="relative">
+          <button
+            (click)="toggleProfileMenu()"
+            class="flex flex-col items-center gap-0.5 cursor-pointer group"
+            [class.text-gold-500]="profileMenuOpen"
+            [class.text-charcoal-300]="!profileMenuOpen"
+          >
+            <span
+              class="w-7 h-7 rounded-full flex items-center justify-center text-[10px] font-bold border transition-all"
+              [class.bg-gold-500]="profileMenuOpen"
+              [class.text-charcoal-900]="profileMenuOpen"
+              [class.border-gold-500]="profileMenuOpen"
+              [class.border-charcoal-600]="!profileMenuOpen"
+              [class.group-hover:border-gold-500]="!profileMenuOpen"
+            >
+              {{ initials }}
+            </span>
+            <span class="text-[9px] tracking-widest uppercase font-semibold group-hover:text-gold-500 transition-colors max-w-[70px] truncate">
+              {{ displayName }}
+            </span>
+          </button>
+
+          <!-- Dropdown -->
+          <div
+            *ngIf="profileMenuOpen"
+            class="absolute right-0 top-full mt-2 w-56 bg-charcoal-900 border border-charcoal-800 shadow-2xl py-2 animate-fade-in z-[1001]"
+          >
+            <!-- Greeting -->
+            <div class="px-4 py-2 border-b border-charcoal-800">
+              <p class="text-[10px] uppercase tracking-widest text-charcoal-500">Signed in as</p>
+              <p class="text-xs text-ivory font-medium truncate">{{ user?.email }}</p>
+            </div>
+
+            <!-- Menu links -->
+            <a routerLink="/account" (click)="closeProfileMenu()" class="flex items-center gap-3 px-4 py-2.5 text-xs text-charcoal-300 hover:text-gold-500 hover:bg-charcoal-800/40 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z" /></svg>
+              My Profile
+            </a>
+            <a routerLink="/account" [queryParams]="{ tab: 'orders' }" (click)="closeProfileMenu()" class="flex items-center gap-3 px-4 py-2.5 text-xs text-charcoal-300 hover:text-gold-500 hover:bg-charcoal-800/40 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12h3.75M9 15h3.75M9 18h3.75m3 .75H18a2.25 2.25 0 0 0 2.25-2.25V6.108c0-1.135-.845-2.098-1.976-2.192a48.424 48.424 0 0 0-1.123-.08m-5.801 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664m-5.8 0A6.751 6.751 0 0 1 12 3.75 6.751 6.751 0 0 1 14.235 6m-5.8 0c-.065.21-.1.433-.1.664 0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75 2.25 2.25 0 0 0-.1-.664" /></svg>
+              Orders & History
+            </a>
+            <a routerLink="/account" [queryParams]="{ tab: 'wishlist' }" (click)="closeProfileMenu()" class="flex items-center gap-3 px-4 py-2.5 text-xs text-charcoal-300 hover:text-gold-500 hover:bg-charcoal-800/40 transition-colors cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M21 8.25c0-2.485-2.099-4.5-4.688-4.5-1.935 0-3.597 1.126-4.312 2.733-.715-1.607-2.377-2.733-4.313-2.733C5.1 3.75 3 5.765 3 8.25c0 7.22 9 12 9 12s9-4.78 9-12Z" /></svg>
+              Wishlist
+            </a>
+
+            <!-- Admin shortcut (only for ADMIN/MANAGER) -->
+            <a *ngIf="isAdmin" routerLink="/admin/dashboard" (click)="closeProfileMenu()" class="flex items-center gap-3 px-4 py-2.5 text-xs text-gold-500 hover:bg-charcoal-800/40 transition-colors cursor-pointer border-t border-charcoal-800 mt-1">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M10.5 6h9.75M10.5 6a1.5 1.5 0 1 1-3 0m3 0a1.5 1.5 0 1 0-3 0M3.75 6H7.5m3 12h9.75m-9.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5m9-6h3.75m-3.75 0a1.5 1.5 0 0 1-3 0m3 0a1.5 1.5 0 0 0-3 0m-3.75 0H7.5" /></svg>
+              Admin Portal
+            </a>
+
+            <!-- Logout -->
+            <button (click)="logout()" class="flex items-center gap-3 px-4 py-2.5 text-xs text-charcoal-300 hover:text-red-400 hover:bg-charcoal-800/40 transition-colors w-full border-t border-charcoal-800 mt-1 cursor-pointer">
+              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-4 h-4"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 9V5.25A2.25 2.25 0 0 0 13.5 3h-6a2.25 2.25 0 0 0-2.25 2.25v13.5A2.25 2.25 0 0 0 7.5 21h6a2.25 2.25 0 0 0 2.25-2.25V15m3 0 3-3m0 0-3-3m3 3H9" /></svg>
+              Logout
+            </button>
+          </div>
+        </div>
+      </div>
 
       <!-- Wishlist with badge -->
       <button routerLink="/shop" [queryParams]="{ filter: 'wishlist' }" title="View Wishlist" class="relative text-charcoal-300 hover:text-gold-500 transition-colors cursor-pointer">
@@ -133,7 +224,26 @@
       <a routerLink="/shop" [queryParams]="{ category: 'coats-jackets' }" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">JACKETS</a>
       <a routerLink="/shop" [queryParams]="{ category: 'suits-blazers' }" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">SUITS</a>
       <a routerLink="/shop" [queryParams]="{ sort: 'newest' }" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">NEW ARRIVALS</a>
-      <a routerLink="/admin/login" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 border-t border-charcoal-800/10 pt-4 text-[10px]">ADMIN PORTAL</a>
+    </nav>
+
+    <!-- Account Section -->
+    <nav class="flex flex-col gap-4 text-xs tracking-widest uppercase font-semibold border-t border-charcoal-800/10 pt-4 mt-2">
+      <!-- Guest -->
+      <ng-container *ngIf="!isLoggedIn">
+        <a routerLink="/login" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">LOGIN / SIGNUP</a>
+      </ng-container>
+      <!-- Logged in -->
+      <ng-container *ngIf="isLoggedIn">
+        <div class="flex items-center gap-3 py-1">
+          <span class="w-8 h-8 rounded-full flex items-center justify-center text-[11px] font-bold border border-charcoal-600 text-charcoal-300">{{ initials }}</span>
+          <span class="text-[10px] normal-case tracking-normal text-charcoal-400 truncate">Hi, {{ displayName }}</span>
+        </div>
+        <a routerLink="/account" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">MY PROFILE</a>
+        <a routerLink="/account" [queryParams]="{ tab: 'orders' }" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">ORDERS & HISTORY</a>
+        <a routerLink="/account" [queryParams]="{ tab: 'wishlist' }" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors">WISHLIST</a>
+        <a *ngIf="isAdmin" routerLink="/admin/dashboard" (click)="toggleMobileMenu()" class="hover:text-gold-500 py-1 transition-colors text-gold-500">ADMIN PORTAL</a>
+        <button (click)="logout(); toggleMobileMenu()" class="hover:text-red-400 py-1 transition-colors text-left text-charcoal-400">LOGOUT</button>
+      </ng-container>
     </nav>
   </div>
 </div>

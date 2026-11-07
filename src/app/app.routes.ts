@@ -2,7 +2,9 @@ import { Routes } from '@angular/router';
 import { StorefrontLayoutComponent } from './layout/storefront-layout/storefront-layout.component';
 import { AdminLayoutComponent } from './layout/admin-layout/admin-layout.component';
 import { AdminLoginComponent } from './admin/login/login.component';
-import { authGuard } from './core/guards/auth.guard';
+import { CustomerLoginComponent } from './account/login.component';
+import { CustomerRegisterComponent } from './account/register.component';
+import { adminGuard, customerGuard } from './core/guards/role.guards';
 import { guestGuard } from './core/guards/guest.guard';
 
 export const routes: Routes = [
@@ -30,8 +32,24 @@ export const routes: Routes = [
       {
         path: 'order',
         loadChildren: () => import('./orders/orders-routes').then((m) => m.ORDERS_ROUTES)
+      },
+      // Customer account area
+      {
+        path: 'account',
+        canActivate: [customerGuard],
+        loadChildren: () => import('./account/account-routes').then((m) => m.ACCOUNT_ROUTES)
       }
     ]
+  },
+
+  // Customer auth pages (standalone, storefront-styled)
+  {
+    path: 'login',
+    component: CustomerLoginComponent
+  },
+  {
+    path: 'register',
+    component: CustomerRegisterComponent
   },
 
   // Admin Login (Standalone page, no sidebar layout)
@@ -45,7 +63,7 @@ export const routes: Routes = [
   {
     path: 'admin',
     component: AdminLayoutComponent,
-    canActivate: [authGuard],
+    canActivate: [adminGuard],
     loadChildren: () => import('./admin/admin-routes').then((m) => m.ADMIN_ROUTES)
   },
 
