@@ -15,7 +15,18 @@ export class AdminLayoutComponent {
   private router = inject(Router);
   private toastService = inject(ToastService);
 
+  mobileMenuOpen = false;
+
+  toggleMobileMenu() {
+    this.mobileMenuOpen = !this.mobileMenuOpen;
+  }
+
+  closeMobileMenu() {
+    this.mobileMenuOpen = false;
+  }
+
   logout() {
+    this.closeMobileMenu();
     this.authService.logout();
     this.toastService.success('Logged out of admin portal');
     this.router.navigate(['/admin/login']);

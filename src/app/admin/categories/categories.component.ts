@@ -2,6 +2,7 @@ import { Component, OnInit, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { CategoryService } from '../../core/services/category.service';
+import { ImageUploadService } from '../../core/services/image-upload.service';
 import { ToastService } from '../../core/services/toast.service';
 import { Category } from '../../core/models/category.model';
 
@@ -14,10 +15,13 @@ import { Category } from '../../core/models/category.model';
 export class CategoriesComponent implements OnInit {
   private fb = inject(FormBuilder);
   private categoryService = inject(CategoryService);
+  private imageUploadService = inject(ImageUploadService);
   private toastService = inject(ToastService);
 
   categories: Category[] = [];
   loading = true;
+  uploading = false;
+  imagePreview: string | null = null;
 
   // Modal state
   showModal = false;
@@ -54,6 +58,7 @@ export class CategoriesComponent implements OnInit {
   openAddModal() {
     this.editingCategory = null;
     this.categoryForm.reset();
+    this.imagePreview = null;
     this.showModal = true;
   }
 
@@ -64,12 +69,40 @@ export class CategoriesComponent implements OnInit {
       description: category.description || '',
       image: category.image || ''
     });
+    this.imagePreview = category.image || null;
     this.showModal = true;
   }
 
   closeModal() {
     this.showModal = false;
     this.editingCategory = null;
+    this.imagePreview = null;
+  }
+
+  onFileSelected(event: Event) {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    this.uploading = true;
+    this.imageUploadService.processImage(file).subscribe({
+      next: (result) => {
+        this.imagePreview = result.dataUrl;
+        this.categoryForm.patchValue({ image: result.dataUrl });
+        this.uploading = false;
+        this.toastService.success('Image ready');
+      },
+      error: (err) => {
+        this.toastService.error(err.message || 'Image processing failed');
+        this.uploading = false;
+      },
+    });
+    input.value = '';
+  }
+
+  removeImage() {
+    this.imagePreview = null;
+    this.categoryForm.patchValue({ image: '' });
   }
 
   deleteCategory(id: number, event: Event) {

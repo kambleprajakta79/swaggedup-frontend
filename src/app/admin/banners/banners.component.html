@@ -1,0 +1,187 @@
+<div class="flex items-center justify-between mb-8">
+  <div>
+    <h1 class="text-2xl font-bold text-ivory font-display tracking-wide">BANNERS</h1>
+    <p class="text-charcoal-400 text-sm mt-1">Manage homepage carousel banners — offers, festive seasons, new arrivals.</p>
+  </div>
+  <button
+    (click)="openAddModal()"
+    class="bg-gold-500 text-charcoal-900 text-xs tracking-widest uppercase font-bold px-5 py-3 hover:bg-gold-600 transition-all cursor-pointer whitespace-nowrap"
+  >
+    + ADD BANNER
+  </button>
+</div>
+
+<!-- Loading -->
+<div *ngIf="loading" class="text-center py-16 text-charcoal-400 text-sm tracking-widest uppercase">Loading banners…</div>
+
+<!-- Empty state -->
+<div *ngIf="!loading && banners.length === 0" class="text-center py-16">
+  <p class="text-charcoal-400 text-sm mb-4">No banners yet. Add your first banner to show it on the homepage carousel.</p>
+</div>
+
+<!-- Banners list -->
+<div *ngIf="!loading && banners.length > 0" class="space-y-4">
+  <div
+    *ngFor="let banner of banners"
+    class="glass-panel flex flex-col sm:flex-row items-start sm:items-center gap-4 p-4"
+  >
+    <!-- Thumbnail -->
+    <img
+      [src]="getBannerImage(banner)"
+      [alt]="banner.title"
+      class="w-full sm:w-40 h-32 sm:h-20 object-cover rounded-md border border-charcoal-800 shrink-0"
+    />
+
+    <!-- Info -->
+    <div class="flex-1 min-w-0">
+      <div class="flex items-center gap-2 flex-wrap">
+        <h3 class="text-ivory font-semibold text-sm truncate">{{ banner.title }}</h3>
+        <span
+          class="text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full"
+          [class]="banner.isActive ? 'bg-green-900/40 text-green-400' : 'bg-charcoal-800 text-charcoal-400'"
+        >
+          {{ banner.isActive ? 'LIVE' : 'HIDDEN' }}
+        </span>
+        <span class="text-[9px] tracking-widest uppercase px-2 py-0.5 rounded-full bg-charcoal-800 text-charcoal-400">
+          ORDER {{ banner.sortOrder }}
+        </span>
+      </div>
+      <p class="text-charcoal-400 text-xs mt-1 truncate">{{ banner.subtitle || 'No subtitle' }}</p>
+      <p class="text-charcoal-500 text-[10px] mt-1 truncate">Link: {{ banner.link || '—' }}</p>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex items-center gap-2 shrink-0">
+      <button
+        (click)="toggleActive(banner, $event)"
+        class="text-[10px] tracking-widest uppercase px-3 py-2 border transition-all cursor-pointer"
+        [class]="banner.isActive ? 'border-charcoal-800 text-charcoal-400 hover:border-gold-500 hover:text-gold-500' : 'border-green-700 text-green-400 hover:bg-green-900/30'"
+      >
+        {{ banner.isActive ? 'HIDE' : 'SHOW' }}
+      </button>
+      <button
+        (click)="openEditModal(banner)"
+        class="text-[10px] tracking-widest uppercase px-3 py-2 border border-charcoal-800 text-ivory hover:border-gold-500 hover:text-gold-500 transition-all cursor-pointer"
+      >
+        EDIT
+      </button>
+      <button
+        (click)="deleteBanner(banner.id, $event)"
+        class="text-[10px] tracking-widest uppercase px-3 py-2 border border-red-900/50 text-red-400 hover:bg-red-900/30 transition-all cursor-pointer"
+      >
+        DELETE
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div *ngIf="showModal" class="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-sm" (click)="closeModal()">
+  <div class="glass-panel w-full max-w-lg max-h-[90vh] overflow-y-auto p-6 md:p-8" (click)="$event.stopPropagation()">
+    <h2 class="text-lg font-bold text-ivory font-display tracking-wide mb-6">
+      {{ editingBanner ? 'EDIT BANNER' : 'ADD BANNER' }}
+    </h2>
+
+    <form [formGroup]="bannerForm" (ngSubmit)="onSubmit()" class="flex flex-col gap-5">
+      <!-- Title -->
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">TITLE *</label>
+        <input
+          type="text"
+          formControlName="title"
+          placeholder="Festive Season Sale"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all"
+        />
+        <div *ngIf="bannerForm.get('title')?.touched && bannerForm.get('title')?.invalid" class="text-xs text-red-500 mt-1">
+          Title is required (minimum 2 characters).
+        </div>
+      </div>
+
+      <!-- Subtitle -->
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">SUBTITLE</label>
+        <input
+          type="text"
+          formControlName="subtitle"
+          placeholder="Up to 40% off on all shirts"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all"
+        />
+      </div>
+
+      <!-- Link -->
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">LINK (WHERE THE BANNER CLICK GOES)</label>
+        <input
+          type="text"
+          formControlName="link"
+          placeholder="/shop?category=festive"
+          class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all"
+        />
+      </div>
+
+      <!-- Sort order + active -->
+      <div class="grid grid-cols-2 gap-4">
+        <div>
+          <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">SORT ORDER</label>
+          <input
+            type="number"
+            formControlName="sortOrder"
+            min="0"
+            class="w-full bg-charcoal-900 border border-charcoal-800 text-sm text-ivory px-4 py-3 focus:outline-none focus:border-gold-500 transition-all"
+          />
+        </div>
+        <div>
+          <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">VISIBLE ON SITE</label>
+          <label class="flex items-center gap-3 bg-charcoal-900 border border-charcoal-800 px-4 py-3 cursor-pointer">
+            <input type="checkbox" formControlName="isActive" class="accent-gold-500 w-4 h-4" />
+            <span class="text-xs text-ivory">{{ bannerForm.get('isActive')?.value ? 'Live' : 'Hidden' }}</span>
+          </label>
+        </div>
+      </div>
+
+      <!-- Image upload -->
+      <div>
+        <label class="block text-[10px] text-charcoal-400 uppercase tracking-widest mb-2 font-medium">BANNER IMAGE *</label>
+        <div
+          *ngIf="!imagePreview"
+          class="border-2 border-dashed border-charcoal-800 hover:border-gold-500/50 transition-all rounded-md p-8 text-center cursor-pointer"
+        >
+          <input type="file" accept="image/jpeg,image/png,image/webp" class="hidden" (change)="onFileSelected($event)" #fileInput />
+          <div (click)="fileInput.click()">
+            <p class="text-ivory text-sm font-medium">Click to upload banner image</p>
+            <p class="text-charcoal-400 text-xs mt-1">JPG, PNG or WEBP — up to 5MB. Landscape images work best (1600px wide).</p>
+          </div>
+        </div>
+        <div *ngIf="imagePreview" class="relative">
+          <img [src]="imagePreview" alt="Banner preview" class="w-full h-40 object-cover rounded-md border border-charcoal-800" />
+          <button
+            type="button"
+            (click)="removeImage()"
+            class="absolute top-2 right-2 bg-charcoal-900/90 text-red-400 text-xs px-3 py-1.5 rounded border border-red-900/50 hover:bg-red-900/30 transition-all cursor-pointer"
+          >
+            REMOVE
+          </button>
+        </div>
+        <p *ngIf="uploading" class="text-gold-500 text-xs mt-2">Processing image…</p>
+      </div>
+
+      <!-- Actions -->
+      <div class="flex gap-3 justify-end mt-2">
+        <button
+          type="button"
+          (click)="closeModal()"
+          class="text-xs tracking-widest uppercase px-5 py-3 border border-charcoal-800 text-charcoal-400 hover:text-ivory transition-all cursor-pointer"
+        >
+          CANCEL
+        </button>
+        <button
+          type="submit"
+          [disabled]="uploading"
+          class="bg-gold-500 text-charcoal-900 text-xs tracking-widest uppercase font-bold px-6 py-3 hover:bg-gold-600 transition-all cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {{ editingBanner ? 'SAVE CHANGES' : 'ADD BANNER' }}
+        </button>
+      </div>
+    </form>
+  </div>
+</div>

@@ -1,30 +1,76 @@
-<!-- Hero Section -->
-<section class="relative h-[85vh] w-full flex items-center justify-center overflow-hidden">
+<!-- Hero Section: Admin-managed banner carousel -->
+<section
+  class="relative h-[70vh] md:h-[85vh] w-full flex items-center justify-center overflow-hidden"
+  (touchstart)="onTouchStart($event)"
+  (touchend)="onTouchEnd($event)"
+>
+  <!-- Slides -->
   <div class="absolute inset-0 z-0">
-    <img 
-      src="https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?q=80&w=1600&auto=format&fit=crop" 
-      alt="Luxury Menswear Banner"
-      class="w-full h-full object-cover brightness-[0.4]"
-    />
+    <div
+      *ngFor="let banner of banners; let i = index"
+      class="absolute inset-0 transition-opacity duration-700 ease-in-out"
+      [class.opacity-100]="i === currentSlide"
+      [class.opacity-0]="i !== currentSlide"
+      [class.pointer-events-none]="i !== currentSlide"
+    >
+      <img
+        [src]="getBannerImage(banner)"
+        [alt]="banner.title"
+        class="w-full h-full object-cover brightness-[0.4]"
+      />
+    </div>
   </div>
+
+  <!-- Slide content -->
   <div class="relative z-10 text-center px-4 max-w-4xl mx-auto animate-fade-in">
     <span class="text-gold-500 uppercase tracking-[0.4em] text-xs md:text-sm font-semibold mb-4 block">
-      The Autumn / Winter Collection
+      {{ activeBanner.subtitle ? 'SwaggedUp' : 'The Autumn / Winter Collection' }}
     </span>
-    <h1 class="text-4xl md:text-6xl lg:text-7xl font-extrabold text-ivory tracking-wide leading-tight mb-6">
-      DEFINE YOUR STYLE.<br/>
-      <span class="text-gold-500">OWN THE LOOK.</span>
+    <h1 class="text-3xl md:text-6xl lg:text-7xl font-extrabold text-ivory tracking-wide leading-tight mb-6">
+      {{ activeBanner.title }}
     </h1>
     <p class="text-charcoal-300 max-w-lg mx-auto text-sm md:text-base font-light mb-8">
-      Uncompromising quality. Sartorial perfection. Discover the new season's finest cashmere, tailored wool blazers, and handcrafted leather footwear.
+      {{ activeBanner.subtitle }}
     </p>
-    <a 
-      routerLink="/shop" 
+    <a
+      [routerLink]="getBannerLink(activeBanner)"
       class="inline-block border border-gold-500 text-gold-500 hover:bg-gold-500 hover:text-charcoal-900 transition-all duration-300 font-display tracking-widest text-xs font-bold px-8 py-4 uppercase hover-gold-glow"
     >
       SHOP COLLECTION
     </a>
   </div>
+
+  <!-- Arrows (hidden on small screens — swipe instead) -->
+  <ng-container *ngIf="banners.length > 1">
+    <button
+      type="button"
+      (click)="prevSlide()"
+      aria-label="Previous banner"
+      class="hidden md:flex absolute left-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center border border-ivory/30 text-ivory hover:border-gold-500 hover:text-gold-500 transition-all cursor-pointer"
+    >
+      &#10094;
+    </button>
+    <button
+      type="button"
+      (click)="nextSlide()"
+      aria-label="Next banner"
+      class="hidden md:flex absolute right-6 top-1/2 -translate-y-1/2 z-20 w-11 h-11 items-center justify-center border border-ivory/30 text-ivory hover:border-gold-500 hover:text-gold-500 transition-all cursor-pointer"
+    >
+      &#10095;
+    </button>
+
+    <!-- Dots -->
+    <div class="absolute bottom-6 left-1/2 -translate-x-1/2 z-20 flex items-center gap-2">
+      <button
+        *ngFor="let banner of banners; let i = index"
+        type="button"
+        (click)="goToSlide(i)"
+        [attr.aria-label]="'Go to banner ' + (i + 1)"
+        class="h-2 rounded-full transition-all duration-300 cursor-pointer"
+        [class]="i === currentSlide ? 'w-8 bg-gold-500' : 'w-2 bg-ivory/40 hover:bg-ivory/70'"
+      ></button>
+    </div>
+  </ng-container>
 </section>
 
 <!-- Category Showcase -->
@@ -42,7 +88,7 @@
       class="group relative h-80 cursor-pointer overflow-hidden border border-charcoal-800"
     >
       <img 
-        [src]="cat.image" 
+        [src]="cat.image || fallbackBanner.image" 
         [alt]="cat.name"
         class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110 brightness-[0.6]"
       />
